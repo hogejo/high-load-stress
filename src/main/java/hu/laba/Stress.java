@@ -114,6 +114,15 @@ public class Stress {
 			new WaitScenario("sleep", 5),
 			countCheck
 		};
+		System.out.println("Expected scenarios will be:");
+		for (int i = 0; i < scenarios.length; i++) {
+			Scenario scenario = scenarios[i];
+			System.out.printf("  %d: %s%n", i, scenario.getDescription());
+			if (scenario.getClass().equals(WaitScenario.class) || scenario.getClass().equals(SingleScenario.class)) {
+				continue;
+			}
+			System.out.printf("    %s%n", scenario.getRequestBuilderDescription());
+		}
 		TimeKeeper globalTimeKeeper = new TimeKeeper();
 		ScenarioLogger scenarioLogger = new ScenarioLogger(globalTimeKeeper);
 		for (Scenario scenario : scenarios) {
