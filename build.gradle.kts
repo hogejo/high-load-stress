@@ -38,7 +38,7 @@ dependencies {
 	implementation(group = "org.jcommander", name = "jcommander", version = "1.83")
 	// TESTING
 	// JUnit Jupiter
-	testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.11.0")
+	testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.10.2")
 	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
 }
 
