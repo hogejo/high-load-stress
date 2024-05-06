@@ -4,7 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 class VehicleTests {
 
@@ -42,6 +47,32 @@ class VehicleTests {
 			vehicleB.requireValid();
 			assert vehicleA.equals(vehicleB);
 		}
+	}
+
+	@Test
+	public void equalsCheck() throws JsonProcessingException {
+		UUID uuid = UUID.fromString("fc3ec2fa-43ce-4165-992d-f7ac899838fa");
+		String registration = "AAA-123";
+		String owner = "foobar";
+		String validity = "2025-05-05";
+		final Vehicle a = new Vehicle(uuid, registration, owner, validity, Set.of("a", "b", "c"));
+		final Vehicle b = new Vehicle(uuid, registration, owner, validity, Set.of("c", "a", "b"));
+		assert Objects.equals(a, b);
+		final String aJson = "{\"uuid\":\"fc3ec2fa-43ce-4165-992d-f7ac899838fa\",\"rendszam\":\"AAA-123\",\"tulajdonos\":\"foobar\",\"forgalmi_ervenyes\":\"2025-05-05\",\"adatok\":[\"a\",\"b\",\"c\"]}";
+		final String bJson = """
+			{
+				"uuid": "fc3ec2fa-43ce-4165-992d-f7ac899838fa",
+				"rendszam": "AAA-123",
+				"tulajdonos": "foobar",
+				"forgalmi_ervenyes": "2025-05-05",
+				"adatok": ["c", "a", "b"]
+			}
+			""";
+		assert !Objects.equals(aJson, bJson);
+		final ObjectMapper objectMapper = new ObjectMapper();
+		final Vehicle sa = objectMapper.readValue(aJson, Vehicle.class);
+		final Vehicle sb = objectMapper.readValue(bJson, Vehicle.class);
+		assert Objects.equals(sa, sb);
 	}
 
 }
