@@ -89,6 +89,7 @@ public class VehicleTracker {
 			Vehicle expectedVehicle = storedVehicles.get(vehicleId);
 			if (!expectedVehicle.equals(receivedVehicle)) {
 				System.err.printf("Request #%d: invalid vehicle returned:%n  %s received%n  %s expected%n", requestId, receivedVehicle.toString(), expectedVehicle);
+				System.err.printf("Request #%d: response body was: %s%n", requestId, body);
 				return false;
 			}
 		} catch (Exception ignored) {

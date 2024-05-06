@@ -5,7 +5,7 @@ plugins {
 // Application config
 
 group = "hu.laba"
-version = "4.1.0"
+version = "4.1.1"
 
 application {
 	mainClass.set("hu.laba.Stress")
