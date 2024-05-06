@@ -62,10 +62,10 @@ class VehicleTests {
 		final String bJson = """
 			{
 				"uuid": "fc3ec2fa-43ce-4165-992d-f7ac899838fa",
-				"rendszam": "AAA-123",
 				"tulajdonos": "foobar",
+				"adatok": ["c", "a", "b"],
 				"forgalmi_ervenyes": "2025-05-05",
-				"adatok": ["c", "a", "b"]
+				"rendszam": "AAA-123"
 			}
 			""";
 		assert !Objects.equals(aJson, bJson);
