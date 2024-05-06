@@ -1,0 +1,21 @@
+root = true
+
+# Java and Kotlin files common
+[{*.java,*.kts,*.kt}]
+charset = utf-8
+max_line_length = 120
+indent_style = tab
+indent_size = tab
+ij_smart_tabs = true
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+ij_java_keep_simple_classes_in_one_line = true
+ij_java_keep_simple_lambdas_in_one_line = true
+ij_java_keep_simple_methods_in_one_line = true
+ij_java_blank_lines_after_class_header = 1
+ij_java_blank_lines_before_class_end = 1
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999
+ij_java_packages_to_use_import_on_demand = 999
+ij_java_use_single_class_imports = true

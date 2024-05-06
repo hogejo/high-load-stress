@@ -1,0 +1,6 @@
+# IntelliJ
+/.idea/
+# Gradle project-specific cache directory
+/.gradle/
+# build output
+/build/
