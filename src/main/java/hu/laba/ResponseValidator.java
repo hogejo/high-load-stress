@@ -10,9 +10,17 @@ public interface ResponseValidator {
 
 	static boolean validateStatusCode(int requestId, Response response, int expectedCode, BiConsumer<String, String> messageAndBodyConsumer) {
 		int actualCode = response.code();
-		if (!response.isSuccessful() || actualCode != expectedCode) {
-			messageAndBodyConsumer.accept("expected status code %d, got %d".formatted(expectedCode, actualCode), null);
-			return false;
+		if (expectedCode < 10) {
+			int actualCodeGroup = actualCode / 100;
+			if (actualCodeGroup != expectedCode) {
+				messageAndBodyConsumer.accept("expected status code %dxx, got %d".formatted(expectedCode, actualCode), null);
+				return false;
+			}
+		} else {
+			if (actualCode != expectedCode) {
+				messageAndBodyConsumer.accept("expected status code %d, got %d".formatted(expectedCode, actualCode), null);
+				return false;
+			}
 		}
 		return true;
 	}
