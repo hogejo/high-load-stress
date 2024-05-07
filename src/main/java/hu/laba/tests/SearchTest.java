@@ -21,7 +21,11 @@ public class SearchTest extends AbstractTest {
 		if (optionalRequest.isEmpty()) {
 			throw new IllegalStateException("no vehicles to search?");
 		} else {
-			validators.put(requestId, response -> vehicleTracker.validateSearchVehicleResponse(requestId, response, forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)));
+			validators.put(requestId,
+				response -> vehicleTracker.validateSearchVehicleResponse(requestId, response,
+					forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)
+				)
+			);
 			return optionalRequest.get();
 		}
 	}

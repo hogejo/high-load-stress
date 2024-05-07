@@ -2,24 +2,24 @@ package hu.laba;
 
 import okhttp3.Response;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public interface ResponseValidator {
 
 	ResponseValidator ALWAYS_VALID_VALIDATOR = (requestId, response) -> true;
 
-	static boolean validateStatusCode(int requestId, Response response, int expectedCode, Consumer<String> messageConsumer) {
+	static boolean validateStatusCode(int requestId, Response response, int expectedCode, BiConsumer<String, String> messageAndBodyConsumer) {
 		int actualCode = response.code();
 		if (!response.isSuccessful() || actualCode != expectedCode) {
-			messageConsumer.accept("expected status code %d, got %d".formatted(expectedCode, actualCode));
+			messageAndBodyConsumer.accept("expected status code %d, got %d".formatted(expectedCode, actualCode), null);
 			return false;
 		}
 		return true;
 	}
 
-	static boolean validateBodyNotNull(int requestId, Response response, Consumer<String> messageConsumer) {
+	static boolean validateBodyNotNull(int requestId, Response response, BiConsumer<String, String> messageAndBodyConsumer) {
 		if (response.body() == null) {
-			messageConsumer.accept("missing body");
+			messageAndBodyConsumer.accept("missing body", null);
 			return false;
 		}
 		return true;

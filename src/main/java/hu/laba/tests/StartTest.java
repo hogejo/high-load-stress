@@ -31,7 +31,11 @@ public class StartTest extends AbstractTest {
 		if (optionalRequest.isEmpty()) {
 			return createVehicleTest(requestId);
 		} else {
-			validators.put(requestId, response -> vehicleTracker.validateSearchVehicleResponse(requestId, response, forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)));
+			validators.put(requestId,
+				response -> vehicleTracker.validateSearchVehicleResponse(requestId, response,
+					forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)
+				)
+			);
 			return optionalRequest.get();
 		}
 	}
@@ -58,7 +62,7 @@ public class StartTest extends AbstractTest {
 		validators.put(requestId, response -> {
 			int code = response.code();
 			if (code / 100 != 4) {
-				dumpInvalidResponse(requestId, request, response, "expected 4xx for invalid create vehicle request, got %d".formatted(code));
+				dumpInvalidResponse(requestId, request, response, null, "expected 4xx for invalid create vehicle request, got %d".formatted(code));
 				return false;
 			}
 			return true;
@@ -70,7 +74,7 @@ public class StartTest extends AbstractTest {
 		Request request = RequestBuilder.getVehicleRequest(base, UUID.randomUUID());
 		validators.put(requestId, response -> {
 			if (response.code() != 404) {
-				dumpInvalidResponse(requestId, request, response, "expected 404 for missing vehicle get request, got %d".formatted(response.code()));
+				dumpInvalidResponse(requestId, request, response, null, "expected 404 for missing vehicle get request, got %d".formatted(response.code()));
 				return false;
 			}
 			return true;
@@ -83,20 +87,25 @@ public class StartTest extends AbstractTest {
 			.get()
 			.url(base + "/kereses")
 			.build();
-		validators.put(requestId, response -> ResponseValidator.validateStatusCode(requestId, response, 400, forwardInvalidResponseMessage(requestId, request, response)));
+		validators.put(requestId,
+			response -> ResponseValidator.validateStatusCode(requestId, response, 400,
+				forwardInvalidResponseMessage(requestId, request, response)
+			)
+		);
 		return request;
 	}
 
 	@Override
 	public Request buildRequest(int requestId) {
-		return switch (requestId % 6) {
+		int i = requestId % 6;
+		return switch (i) {
 			case 0 -> createVehicleTest(requestId);
 			case 1 -> getVehicleTestOrCreate(requestId);
 			case 2 -> searchVehicleTest(requestId);
 			case 3 -> invalidCreateVehicleTest(requestId);
 			case 4 -> invalidGetVehicleTest(requestId);
 			case 5 -> invalidSearchVehicleTest(requestId);
-			default -> throw new IllegalStateException("Unexpected value: " + requestId % 4);
+			default -> throw new IllegalStateException("Unexpected value: " + i);
 		};
 	}
 
