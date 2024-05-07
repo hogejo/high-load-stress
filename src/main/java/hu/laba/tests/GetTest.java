@@ -1,6 +1,8 @@
 package hu.laba.tests;
 
-import hu.laba.*;
+import hu.laba.RequestBuilder;
+import hu.laba.ResponseValidator;
+import hu.laba.ResponseValidatorFunction;
 import okhttp3.Request;
 import okhttp3.Response;
 
