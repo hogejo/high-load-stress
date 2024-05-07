@@ -183,8 +183,12 @@ public class ScenarioLogger extends EventListener {
 		return Stream.concat(Stream.of(csvHeader), dataPoints.stream().map(DataPoint::toCSVLine)).toList();
 	}
 
-	public void saveAsCSV(Path path) throws IOException {
-		Files.write(path, getAsCSV());
+	public void saveAsCSV(Path path) {
+		try {
+			Files.write(path, getAsCSV());
+		} catch (IOException exception) {
+			System.err.println("Failed to write CSV file: " + exception.getMessage());
+		}
 	}
 
 	private void putLatencyInBucket(long timeInMillis) {

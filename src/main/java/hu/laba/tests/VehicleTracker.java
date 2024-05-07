@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class VehicleTracker {
@@ -39,13 +40,14 @@ public class VehicleTracker {
 		return RequestBuilder.createVehicleRequest(base, vehicle.toCreateJsonString());
 	}
 
-	public boolean validateCreateVehicleResponse(int requestId, Response response) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 201) || !ResponseValidator.validateBodyNotNull(requestId, response)) {
+	public boolean validateCreateVehicleResponse(int requestId, Response response, Consumer<String> messageConsumer) {
+		if (!ResponseValidator.validateStatusCode(requestId, response, 201, messageConsumer)
+			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageConsumer)) {
 			return false;
 		}
 		String locationHeader = response.header("Location");
 		if (locationHeader == null) {
-			System.err.printf("Request #%d: missing location header%n", requestId);
+			messageConsumer.accept("missing location header");
 			return false;
 		}
 		String uuidString = locationHeader.replaceAll("^.*/jarmuvek/", "");
@@ -56,9 +58,7 @@ public class VehicleTracker {
 			storedVehicles.add(storedVehicle);
 			sentVehicles.remove(requestId);
 		} catch (Exception exception) {
-			System.err.printf("Request #%d: invalid uuid returned: %s%n", requestId, exception);
-			System.err.println("Location header was: '" + locationHeader + "'");
-			System.err.println("UUID string I tried to decode: '" + uuidString + "'");
+			messageConsumer.accept("invalid uuid (%s) returned. Check Location header. UUID string I tried to decode: %s".formatted(exception.getMessage(), uuidString));
 			return false;
 		}
 		return true;
@@ -72,13 +72,14 @@ public class VehicleTracker {
 		queriedVehicles.put(requestId, vehicleId);
 		UUID uuid = storedVehicles.get(vehicleId).uuid();
 		if (uuid == null) {
-			throw new RuntimeException("stored vehicles's UUID can not be null");
+			throw new IllegalStateException("stored vehicles's UUID can not be null");
 		}
 		return Optional.of(RequestBuilder.getVehicleRequest(base, uuid));
 	}
 
-	public boolean validateGetVehicleResponse(int requestId, Response response) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200) || !ResponseValidator.validateBodyNotNull(requestId, response)) {
+	public boolean validateGetVehicleResponse(int requestId, Response response, Consumer<String> messageConsumer) {
+		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageConsumer)
+			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageConsumer)) {
 			return false;
 		}
 		assert response.body() != null;
@@ -88,18 +89,17 @@ public class VehicleTracker {
 			int vehicleId = queriedVehicles.remove(requestId);
 			Vehicle expectedVehicle = storedVehicles.get(vehicleId);
 			if (!expectedVehicle.equals(receivedVehicle)) {
-				System.err.printf("Request #%d: invalid vehicle returned:%n  %s received%n  %s expected%n", requestId, receivedVehicle.toString(), expectedVehicle);
-				System.err.printf("Request #%d: response body was: %s%n", requestId, body);
+				messageConsumer.accept("invalid vehicle returned: RECEIVED: %s, EXPECTED: %s".formatted(receivedVehicle, expectedVehicle));
 				return false;
 			}
 		} catch (Exception exception) {
-			System.err.printf("Request #%d: failed to parse vehicle: %s%n", requestId, exception.getMessage());
+			messageConsumer.accept("failed to parse vehicle: %s".formatted(exception.getMessage()));
 			return false;
 		}
 		return true;
 	}
 
-	public Optional<Request> searchVehicle(int requestId, String base) {
+	public Optional<Request> searchOneVehicle(int requestId, String base) {
 		if (storedVehicles.isEmpty()) {
 			return Optional.empty();
 		}
@@ -108,8 +108,9 @@ public class VehicleTracker {
 		return Optional.of(RequestBuilder.searchVehiclesRequest(base, storedVehicles.get(vehicleId).registration()));
 	}
 
-	public boolean validateSearchVehicleResponse(int requestId, Response response) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200) || !ResponseValidator.validateBodyNotNull(requestId, response)) {
+	public boolean validateSearchVehicleResponse(int requestId, Response response, Consumer<String> messageConsumer) {
+		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageConsumer)
+			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageConsumer)) {
 			return false;
 		}
 		assert response.body() != null;
@@ -119,29 +120,30 @@ public class VehicleTracker {
 			int vehicleId = queriedVehicles.remove(requestId);
 			List<Vehicle> expectedVehicles = List.of(storedVehicles.get(vehicleId));
 			if (!expectedVehicles.equals(receivedVehicles)) {
-				System.err.printf("Request #%d: invalid list of vehicles returned:%n  %s received%n  %s expected%n", requestId, receivedVehicles.toString(), expectedVehicles);
+				messageConsumer.accept("invalid list of vehicles returned: RECEIVED: %s, EXPECTED: %s".formatted(receivedVehicles, expectedVehicles));
 				return false;
 			}
 		} catch (Exception exception) {
-			System.err.printf("Request #%d: failed to parse vehicle: %s%n", requestId, exception.getMessage());
+			messageConsumer.accept("failed to parse vehicle: %s".formatted(exception.getMessage()));
 			return false;
 		}
 		return true;
 	}
 
-	public boolean validateCountVehiclesResponse(int requestId, Response response, Function<Integer, Boolean> countValidatorFunction) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200) || !ResponseValidator.validateBodyNotNull(requestId, response)) {
+	public boolean validateCountVehiclesResponse(int requestId, Response response, Function<Integer, Boolean> countValidatorFunction, Consumer<String> messageConsumer) {
+		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageConsumer)
+			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageConsumer)) {
 			return false;
 		}
 		assert response.body() != null;
 		try {
 			Integer actualCount = Integer.parseInt(response.body().string());
 			if (!countValidatorFunction.apply(actualCount)) {
-				System.err.printf("Request #%d: count of vehicles too different from expectation: got %d%n", requestId, actualCount);
+				messageConsumer.accept("count of vehicles too different from expectation: got %d".formatted(actualCount));
 				return false;
 			}
-		} catch (Exception ignored) {
-			System.err.printf("Request #%d: failed to parse result%n", requestId);
+		} catch (Exception exception) {
+			messageConsumer.accept("failed to parse result: %s".formatted(exception.getMessage()));
 			return false;
 		}
 		return true;
