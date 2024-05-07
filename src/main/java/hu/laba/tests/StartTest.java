@@ -59,7 +59,7 @@ public class StartTest implements RequestBuilder, ResponseValidator {
 		validators.put(requestId, response -> {
 			int code = response.code();
 			if (code / 100 != 4) {
-				System.err.printf("Request#%d: expected 4xx for invalid create vehicle request, got %d%n", requestId, code);
+				System.err.printf("Request #%d: expected 4xx for invalid create vehicle request, got %d%n", requestId, code);
 				return false;
 			}
 			return true;
