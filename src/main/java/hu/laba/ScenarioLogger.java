@@ -187,7 +187,7 @@ public class ScenarioLogger extends EventListener {
 		try {
 			Files.write(path, getAsCSV());
 		} catch (IOException exception) {
-			System.err.println("Failed to write CSV file: " + exception.getMessage());
+			System.err.println("Failed to write CSV file: " + exception);
 		}
 	}
 

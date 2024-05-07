@@ -58,8 +58,6 @@ public class ScenarioRunner {
 				completedRequests.incrementAndGet();
 				if (responseValidator.validateResponse(REQUEST_ID, response)) {
 					scenarioLogger.recordValidRequest();
-				} else {
-					System.err.println("Request #" + REQUEST_ID + " is not valid");
 				}
 				response.close();
 			}
