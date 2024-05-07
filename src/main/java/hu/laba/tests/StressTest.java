@@ -19,7 +19,7 @@ public class StressTest extends AbstractTest {
 	}
 
 	private Request getVehicleTestOrCreate(int requestId) {
-		return getVehicleTest(requestId).orElse(createVehicleTest(requestId));
+		return getVehicleTest(requestId).orElseGet(() -> createVehicleTest(requestId));
 	}
 
 	private Request searchManyVehiclesTest(int requestId) {

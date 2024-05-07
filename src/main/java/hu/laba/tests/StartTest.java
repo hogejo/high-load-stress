@@ -23,7 +23,7 @@ public class StartTest extends AbstractTest {
 	}
 
 	private Request getVehicleTestOrCreate(int requestId) {
-		return getVehicleTest(requestId).orElse(createVehicleTest(requestId));
+		return getVehicleTest(requestId).orElseGet(() -> createVehicleTest(requestId));
 	}
 
 	private Request searchVehicleTest(int requestId) {
@@ -59,26 +59,21 @@ public class StartTest extends AbstractTest {
 				default -> throw new IllegalStateException("Unexpected value: " + r);
 			}
 		);
-		validators.put(requestId, response -> {
-			int code = response.code();
-			if (code / 100 != 4) {
-				dumpInvalidResponse(requestId, request, response, null, "expected 4xx for invalid create vehicle request, got %d".formatted(code));
-				return false;
-			}
-			return true;
-		});
+		validators.put(requestId,
+			response -> ResponseValidator.validateStatusCode(requestId, response, 4,
+				forwardInvalidResponseMessage(requestId, request, response)
+			)
+		);
 		return request;
 	}
 
 	private Request invalidGetVehicleTest(int requestId) {
 		Request request = RequestBuilder.getVehicleRequest(base, UUID.randomUUID());
-		validators.put(requestId, response -> {
-			if (response.code() != 404) {
-				dumpInvalidResponse(requestId, request, response, null, "expected 404 for missing vehicle get request, got %d".formatted(response.code()));
-				return false;
-			}
-			return true;
-		});
+		validators.put(requestId,
+			response -> ResponseValidator.validateStatusCode(requestId, response, 404,
+				forwardInvalidResponseMessage(requestId, request, response)
+			)
+		);
 		return request;
 	}
 
