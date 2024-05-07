@@ -4,7 +4,7 @@ public class TimeKeeper {
 
 	private long zeroTime = System.currentTimeMillis();
 	private float lastTick = -1f;
-	private float tickTime = 0.1f;
+	private final float tickTime = 0.1f;
 	private Runnable tickFunction = null;
 
 	public void setTickFunction(Runnable runnable) {

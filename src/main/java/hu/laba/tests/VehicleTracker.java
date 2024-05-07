@@ -21,9 +21,9 @@ import java.util.function.Function;
 public class VehicleTracker {
 
 	private final AtomicInteger nextVehicleId = new AtomicInteger(0);
-	public Map<Integer, Vehicle> sentVehicles = new ConcurrentHashMap<>();
-	public Map<Integer, Integer> queriedVehicles = new ConcurrentHashMap<>();
-	public List<Vehicle> storedVehicles = new CopyOnWriteArrayList<>();
+	public final Map<Integer, Vehicle> sentVehicles = new ConcurrentHashMap<>();
+	public final Map<Integer, Integer> queriedVehicles = new ConcurrentHashMap<>();
+	public final List<Vehicle> storedVehicles = new CopyOnWriteArrayList<>();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public Vehicle createNewRandomVehicle() {

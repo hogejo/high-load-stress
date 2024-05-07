@@ -2,15 +2,9 @@ package hu.laba;
 
 import okhttp3.Response;
 
-import java.util.List;
-
 public interface ResponseValidator {
 
 	ResponseValidator ALWAYS_VALID_VALIDATOR = (requestId, response) -> true;
-
-	static ResponseValidator roundRobin(List<ResponseValidatorFunction> validators) {
-		return (requestId, response) -> validators.get(requestId % validators.size()).apply(response);
-	}
 
 	static boolean validateStatusCode(int requestId, Response response, int expectedCode) {
 		int actualCode = response.code();

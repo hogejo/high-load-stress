@@ -67,7 +67,7 @@ public class ScenarioRunner {
 	}
 
 	@SuppressWarnings("BusyWait")
-	public ScenarioLogger run() throws InterruptedException {
+	public void run() throws InterruptedException {
 		System.out.println();
 		System.out.printf("Executing scenario %s%n", scenario.getName());
 		System.out.println(scenario.getDescription());
@@ -116,7 +116,6 @@ public class ScenarioRunner {
 		scenarioLogger.createDataPoint();
 		executorService.shutdown();
 		System.out.printf("All done in %.2f seconds total %n", timeKeeper.now());
-		return scenarioLogger;
 	}
 
 }
