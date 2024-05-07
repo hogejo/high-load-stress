@@ -92,8 +92,8 @@ public class VehicleTracker {
 				System.err.printf("Request #%d: response body was: %s%n", requestId, body);
 				return false;
 			}
-		} catch (Exception ignored) {
-			System.err.printf("Request #%d: failed to parse vehicle%n", requestId);
+		} catch (Exception exception) {
+			System.err.printf("Request #%d: failed to parse vehicle: %s%n", requestId, exception.getMessage());
 			return false;
 		}
 		return true;
@@ -122,8 +122,8 @@ public class VehicleTracker {
 				System.err.printf("Request #%d: invalid list of vehicles returned:%n  %s received%n  %s expected%n", requestId, receivedVehicles.toString(), expectedVehicles);
 				return false;
 			}
-		} catch (Exception ignored) {
-			System.err.printf("Request #%d: failed to parse vehicle%n", requestId);
+		} catch (Exception exception) {
+			System.err.printf("Request #%d: failed to parse vehicle: %s%n", requestId, exception.getMessage());
 			return false;
 		}
 		return true;
