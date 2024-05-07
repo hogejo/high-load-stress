@@ -94,7 +94,7 @@ public class Stress {
 					System.err.println("Count check returned " + actualCount);
 					return true;
 				},
-				ignored -> {}
+				(ignored, ignored2) -> {}
 			)
 		);
 		Scenario[] scenarios = new Scenario[]{

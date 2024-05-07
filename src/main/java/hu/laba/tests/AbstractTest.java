@@ -13,7 +13,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class AbstractTest implements RequestBuilder, ResponseValidator {
 
@@ -61,17 +61,23 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 		return optionalRequest;
 	}
 
-	protected void dumpInvalidResponse(int requestId, Request request, Response response, String message) {
+	protected void dumpInvalidResponse(int requestId, Request request, Response response, String responseBody, String message) {
 		String output = "Response to request #%d was invalid: %s%n".formatted(requestId, message);
 		output += "Request went to %s%n".formatted(request.url());
 		output += "Request headers were: %s%n".formatted(response.headers());
-		if (request.body() != null) {
-			output += "Request body was:%n%s%n".formatted(request.body());
-		}
 		output += "Response status code was %d%n".formatted(response.code());
 		output += "Response headers were: %s%n".formatted(response.headers());
-		if (response.body() != null) {
-			output += "Response body was:%n%s%n".formatted(response.body());
+		if (responseBody == null && response.body() != null) {
+			try {
+				responseBody = response.body().string();
+			} catch (IOException exception) {
+				System.err.println("Exception while trying to read response body: " + exception.getMessage());
+			}
+		}
+		if (responseBody != null) {
+			output += "Response body was:%n%s%n".formatted(responseBody);
+		} else {
+			output += "Response body was empty.\n";
 		}
 		if (dumpDirectory != null) {
 			System.err.printf("Request #%d is invalid. See dump for details.%n", requestId);
@@ -90,8 +96,8 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 		}
 	}
 
-	protected Consumer<String> forwardInvalidResponseMessage(int requestId, Request request, Response response) {
-		return message -> dumpInvalidResponse(requestId, request, response, message);
+	protected BiConsumer<String, String> forwardInvalidResponseMessage(int requestId, Request request, Response response) {
+		return (message, body) -> dumpInvalidResponse(requestId, request, response, body, message);
 	}
 
 }
