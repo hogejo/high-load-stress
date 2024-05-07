@@ -51,22 +51,20 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 
 	protected Optional<Request> getVehicleTest(int requestId) {
 		Optional<Request> optionalRequest = vehicleTracker.getVehicle(requestId, base);
-		optionalRequest.ifPresent(
-			request -> validators.put(requestId,
-				response -> vehicleTracker.validateGetVehicleResponse(requestId, response,
-					forwardInvalidResponseMessage(requestId, request, response)
-				)
+		optionalRequest.ifPresent(request -> validators.put(requestId,
+			response -> vehicleTracker.validateGetVehicleResponse(requestId, response,
+				forwardInvalidResponseMessage(requestId, request, response)
 			)
-		);
+		));
 		return optionalRequest;
 	}
 
 	protected void dumpInvalidResponse(int requestId, Request request, Response response, String responseBody, String message) {
 		String output = "== Response to request #%d was invalid: %s%n".formatted(requestId, message);
-		output += "== Request went to %s%n".formatted(request.url());
-		output += "== Request headers were: %s%n".formatted(response.headers());
+		output += "== %s request went to %s%n".formatted(request.method(), request.url());
+		output += "== Request headers were: %n%s%n".formatted(response.headers());
 		output += "== Response status code was %d%n".formatted(response.code());
-		output += "== Response headers were: %s%n".formatted(response.headers());
+		output += "== Response headers were: %n%s%n".formatted(response.headers());
 		if (responseBody == null && response.body() != null) {
 			try {
 				responseBody = response.body().string();
