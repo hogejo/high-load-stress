@@ -49,8 +49,7 @@ public class Stress {
 					Files.createDirectory(requestDumpDirectoryPath);
 					System.out.println("Created directory for dumping invalid responses: " + requestDumpDirectoryPath);
 				} catch (IOException exception) {
-					System.err.println("Can't create directory: " + requestDumpDirectoryPath);
-					exception.printStackTrace(System.err);
+					System.err.printf("Can't create directory %s: %s%n", requestDumpDirectoryPath, exception);
 					System.exit(1);
 				}
 			}

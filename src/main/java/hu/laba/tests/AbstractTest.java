@@ -62,11 +62,11 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 	}
 
 	protected void dumpInvalidResponse(int requestId, Request request, Response response, String responseBody, String message) {
-		String output = "Response to request #%d was invalid: %s%n".formatted(requestId, message);
-		output += "Request went to %s%n".formatted(request.url());
-		output += "Request headers were: %s%n".formatted(response.headers());
-		output += "Response status code was %d%n".formatted(response.code());
-		output += "Response headers were: %s%n".formatted(response.headers());
+		String output = "== Response to request #%d was invalid: %s%n".formatted(requestId, message);
+		output += "== Request went to %s%n".formatted(request.url());
+		output += "== Request headers were: %s%n".formatted(response.headers());
+		output += "== Response status code was %d%n".formatted(response.code());
+		output += "== Response headers were: %s%n".formatted(response.headers());
 		if (responseBody == null && response.body() != null) {
 			try {
 				responseBody = response.body().string();
@@ -75,9 +75,9 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 			}
 		}
 		if (responseBody != null) {
-			output += "Response body was:%n%s%n".formatted(responseBody);
+			output += "== Response body was:%n%s%n".formatted(responseBody);
 		} else {
-			output += "Response body was empty.\n";
+			output += "== Response body was empty.\n";
 		}
 		if (dumpDirectory != null) {
 			System.err.printf("Request #%d is invalid. See dump for details.%n", requestId);
@@ -86,9 +86,9 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 				if (Files.exists(outputFilePath)) {
 					System.err.println("Overwriting existing dump file: " + outputFilePath);
 				}
-				Files.writeString(outputFilePath, output, StandardOpenOption.TRUNCATE_EXISTING);
-			} catch (IOException e) {
-				System.err.println("Failed to write dump file to " + outputFilePath);
+				Files.writeString(outputFilePath, output, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException exception) {
+				System.err.printf("Failed to write dump file to %s: %s%n", outputFilePath, exception);
 				System.err.print(output);
 			}
 		} else {
