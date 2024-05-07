@@ -22,6 +22,8 @@ import java.util.stream.Stream;
 
 public class ScenarioLogger extends EventListener {
 
+	private static final String csvHeader = "time,expectedRequests,scheduledRequests,startedRequests,successfulRequests,validResponses,failedRequests,requestsPerSecond,latency90th";
+
 	public record DataPoint(
 		float time,
 		int expectedRequests,
@@ -33,10 +35,6 @@ public class ScenarioLogger extends EventListener {
 		int requestsPerSecond,
 		int latency90th
 	) {
-
-		public static String CSVHeader() {
-			return "time,expectedRequests,scheduledRequests,startedRequests,successfulRequests,validResponses,failedRequests,requestsPerSecond,latency90th";
-		}
 
 		public String toCSVLine() {
 			return "%.2f,%d,%d,%d,%d,%d,%d,%d,%d".formatted(
@@ -97,7 +95,7 @@ public class ScenarioLogger extends EventListener {
 	private final AtomicInteger failedRequests = new AtomicInteger();
 	private final List<Integer> allLatencies = new CopyOnWriteArrayList<>();
 	private final PriorityBlockingQueue<Float> requestTimestamps = new PriorityBlockingQueue<>();
-	private final ConcurrentHashMap<String, AtomicInteger> failReasons = new ConcurrentHashMap();
+	private final ConcurrentHashMap<String, AtomicInteger> failReasons = new ConcurrentHashMap<>();
 
 	// Latency buckets
 	private final Map<Call, Long> requestStartTimes = new ConcurrentHashMap<>();
@@ -182,7 +180,7 @@ public class ScenarioLogger extends EventListener {
 	}
 
 	public List<String> getAsCSV() {
-		return Stream.concat(Stream.of(DataPoint.CSVHeader()), dataPoints.stream().map(DataPoint::toCSVLine)).toList();
+		return Stream.concat(Stream.of(csvHeader), dataPoints.stream().map(DataPoint::toCSVLine)).toList();
 	}
 
 	public void saveAsCSV(Path path) throws IOException {
