@@ -41,6 +41,25 @@ public class Stress {
 			System.err.println("Can't create file: " + timelineOutputPath.getParent());
 			System.exit(1);
 		}
+		Path dumpdirectory = null;
+		if (configuration.dumpRequests) {
+			Path requestDumpDirectoryPath = Path.of(configuration.requestDumpDirectory);
+			if (!Files.exists(requestDumpDirectoryPath)) {
+				try {
+					Files.createDirectory(requestDumpDirectoryPath);
+					System.out.println("Created directory for dumping invalid responses: " + requestDumpDirectoryPath);
+				} catch (IOException exception) {
+					System.err.println("Can't create directory: " + requestDumpDirectoryPath);
+					exception.printStackTrace(System.err);
+					System.exit(1);
+				}
+			}
+			if (!Files.isDirectory(requestDumpDirectoryPath)) {
+				System.err.println("Dump directory is not a directory: " + requestDumpDirectoryPath);
+				System.exit(1);
+			}
+			dumpdirectory = requestDumpDirectoryPath;
+		}
 		if (configuration.help) {
 			System.out.println("Run (entire) official stress test against HTTP endpoint.");
 			System.out.println();
@@ -50,7 +69,7 @@ public class Stress {
 		}
 		String baseUrl = "http://" + configuration.endpoint;
 		try {
-			run(baseUrl, timelineOutputPath);
+			run(baseUrl, timelineOutputPath, dumpdirectory);
 		} catch (InterruptedException | IOException e) {
 			System.err.println("Exception: " + e.getMessage());
 			e.printStackTrace(System.err);
@@ -58,14 +77,14 @@ public class Stress {
 		}
 	}
 
-	private static void run(String baseUrl, Path timelineOutputPath) throws InterruptedException, IOException {
+	private static void run(String baseUrl, Path timelineOutputPath, Path dumpDirectory) throws InterruptedException, IOException {
 		System.out.println("Running stress test against base URL: " + baseUrl);
 		VehicleTracker vehicleTracker = new VehicleTracker();
-		StartTest startTest = new StartTest(baseUrl, vehicleTracker);
-		CreateTest createTest = new CreateTest(baseUrl, vehicleTracker);
-		GetTest getTest = new GetTest(baseUrl, vehicleTracker);
-		SearchTest searchTest = new SearchTest(baseUrl, vehicleTracker);
-		StressTest stressTest = new StressTest(baseUrl, vehicleTracker);
+		StartTest startTest = new StartTest(baseUrl, vehicleTracker, dumpDirectory);
+		CreateTest createTest = new CreateTest(baseUrl, vehicleTracker, dumpDirectory);
+		GetTest getTest = new GetTest(baseUrl, vehicleTracker, dumpDirectory);
+		SearchTest searchTest = new SearchTest(baseUrl, vehicleTracker, dumpDirectory);
+		StressTest stressTest = new StressTest(baseUrl, vehicleTracker, dumpDirectory);
 		SingleScenario countCheck = new SingleScenario("count-check",
 			requestId -> RequestBuilder.countVehiclesRequest(baseUrl),
 			(requestId, response) -> vehicleTracker.validateCountVehiclesResponse(
@@ -74,7 +93,8 @@ public class Stress {
 				actualCount -> {
 					System.err.println("Count check returned " + actualCount);
 					return true;
-				}
+				},
+				ignored -> {}
 			)
 		);
 		Scenario[] scenarios = new Scenario[]{
