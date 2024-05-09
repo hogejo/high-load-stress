@@ -1,6 +1,7 @@
 package hu.laba.tests;
 
 import hu.laba.RequestBuilder;
+import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
 import hu.laba.VehicleGenerator;
 import okhttp3.Request;
@@ -18,20 +19,21 @@ public class StressTest extends AbstractTest {
 		return "StressTest";
 	}
 
-	private Request getVehicleTestOrCreate(int requestId) {
+	private RequestResponseContext getVehicleTestOrCreate(int requestId) {
 		return getVehicleTest(requestId).orElseGet(() -> createVehicleTest(requestId));
 	}
 
-	private Request searchManyVehiclesTest(int requestId) {
+	private RequestResponseContext searchManyVehiclesTest(int requestId) {
 		Request request = RequestBuilder.searchVehiclesRequest(base, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
-		validators.put(requestId, response ->
-			ResponseValidator.validateStatusCode(requestId, response, 200, forwardInvalidResponseMessage(requestId, request, response))
-				&& ResponseValidator.validateBodyNotNull(requestId, response, forwardInvalidResponseMessage(requestId, request, response)));
-		return request;
+		validators.put(requestId, context -> {
+			ResponseValidator.validateStatusCode(context, 200);
+			ResponseValidator.validateBodyNotNull(context);
+		});
+		return new RequestResponseContext(requestId, request);
 	}
 
 	@Override
-	public Request buildRequest(int requestId) {
+	public RequestResponseContext buildRequest(int requestId) {
 		return switch (requestId % 10) {
 			case 0 -> createVehicleTest(requestId);
 			case 1, 2 -> searchManyVehiclesTest(requestId);

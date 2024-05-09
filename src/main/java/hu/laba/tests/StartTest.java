@@ -1,6 +1,7 @@
 package hu.laba.tests;
 
 import hu.laba.RequestBuilder;
+import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
 import hu.laba.Vehicle;
 import hu.laba.VehicleGenerator;
@@ -22,25 +23,21 @@ public class StartTest extends AbstractTest {
 		return "StartTest(create, get, search, invalidCreate, invalidGet, invalidSearch)";
 	}
 
-	private Request getVehicleTestOrCreate(int requestId) {
+	private RequestResponseContext getVehicleTestOrCreate(int requestId) {
 		return getVehicleTest(requestId).orElseGet(() -> createVehicleTest(requestId));
 	}
 
-	private Request searchVehicleTest(int requestId) {
-		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicle(requestId, base);
+	private RequestResponseContext searchVehicleTest(int requestId) {
+		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicleRequest(requestId, base);
 		if (optionalRequest.isEmpty()) {
 			return createVehicleTest(requestId);
 		} else {
-			validators.put(requestId,
-				response -> vehicleTracker.validateSearchVehicleResponse(requestId, response,
-					forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)
-				)
-			);
-			return optionalRequest.get();
+			validators.put(requestId, vehicleTracker::validateSearchVehicleResponse);
+			return new RequestResponseContext(requestId, optionalRequest.get());
 		}
 	}
 
-	private Request invalidCreateVehicleTest(int requestId) {
+	private RequestResponseContext invalidCreateVehicleTest(int requestId) {
 		Vehicle vehicle = VehicleGenerator.generateRandom(requestId);
 		// No read after this, so why store?
 		//vehicleTracker.sentVehicles.put(requestId, vehicle);
@@ -59,39 +56,27 @@ public class StartTest extends AbstractTest {
 				default -> throw new IllegalStateException("Unexpected value: " + r);
 			}
 		);
-		validators.put(requestId,
-			response -> ResponseValidator.validateStatusCode(requestId, response, 4,
-				forwardInvalidResponseMessage(requestId, request, response)
-			)
-		);
-		return request;
+		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 4));
+		return new RequestResponseContext(requestId, request);
 	}
 
-	private Request invalidGetVehicleTest(int requestId) {
+	private RequestResponseContext invalidGetVehicleTest(int requestId) {
 		Request request = RequestBuilder.getVehicleRequest(base, UUID.randomUUID());
-		validators.put(requestId,
-			response -> ResponseValidator.validateStatusCode(requestId, response, 404,
-				forwardInvalidResponseMessage(requestId, request, response)
-			)
-		);
-		return request;
+		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 404));
+		return new RequestResponseContext(requestId, request);
 	}
 
-	private Request invalidSearchVehicleTest(int requestId) {
+	private RequestResponseContext invalidSearchVehicleTest(int requestId) {
 		Request request = new Request.Builder()
 			.get()
 			.url(base + "/kereses")
 			.build();
-		validators.put(requestId,
-			response -> ResponseValidator.validateStatusCode(requestId, response, 400,
-				forwardInvalidResponseMessage(requestId, request, response)
-			)
-		);
-		return request;
+		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 400));
+		return new RequestResponseContext(requestId, request);
 	}
 
 	@Override
-	public Request buildRequest(int requestId) {
+	public RequestResponseContext buildRequest(int requestId) {
 		int i = requestId % 6;
 		return switch (i) {
 			case 0 -> createVehicleTest(requestId);

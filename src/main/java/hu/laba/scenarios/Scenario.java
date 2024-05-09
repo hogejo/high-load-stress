@@ -1,9 +1,8 @@
 package hu.laba.scenarios;
 
 import hu.laba.RequestBuilder;
+import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Base class for all scenarios, with basic implementation for name and duration.
@@ -62,13 +61,13 @@ public abstract class Scenario implements RequestBuilder, ResponseValidator {
 	public abstract int getRequestCountAtTime(float time);
 
 	@Override
-	public Request buildRequest(int requestId) {
+	public RequestResponseContext buildRequest(int requestId) {
 		return requestBuilder.buildRequest(requestId);
 	}
 
 	@Override
-	public Boolean validateResponse(int requestId, Response response) {
-		return responseValidator.validateResponse(requestId, response);
+	public void validateResponse(RequestResponseContext context) {
+		responseValidator.validateResponse(context);
 	}
 
 }

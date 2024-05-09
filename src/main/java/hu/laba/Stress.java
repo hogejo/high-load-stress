@@ -85,15 +85,13 @@ public class Stress {
 		SearchTest searchTest = new SearchTest(baseUrl, vehicleTracker, dumpDirectory);
 		StressTest stressTest = new StressTest(baseUrl, vehicleTracker, dumpDirectory);
 		SingleScenario countCheck = new SingleScenario("count-check",
-			requestId -> RequestBuilder.countVehiclesRequest(baseUrl),
-			(requestId, response) -> vehicleTracker.validateCountVehiclesResponse(
-				requestId,
-				response,
+			requestId -> new RequestResponseContext(requestId, RequestBuilder.countVehiclesRequest(baseUrl)),
+			(context) -> vehicleTracker.validateCountVehiclesResponse(
+				context,
 				actualCount -> {
 					System.err.println("Count check returned " + actualCount);
 					return true;
-				},
-				(ignored, ignored2) -> {}
+				}
 			)
 		);
 		Scenario[] scenarios = new Scenario[]{

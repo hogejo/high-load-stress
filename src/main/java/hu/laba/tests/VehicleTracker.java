@@ -3,11 +3,11 @@ package hu.laba.tests;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hu.laba.RequestBuilder;
+import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
 import hu.laba.Vehicle;
 import hu.laba.VehicleGenerator;
 import okhttp3.Request;
-import okhttp3.Response;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class VehicleTracker {
@@ -35,36 +34,35 @@ public class VehicleTracker {
 		return vehicle;
 	}
 
-	public Request createVehicle(int requestId, String base, Vehicle vehicle) {
+	public Request createVehicleRequest(int requestId, String base, Vehicle vehicle) {
 		sentVehicles.put(requestId, vehicle);
 		return RequestBuilder.createVehicleRequest(base, vehicle.toCreateJsonString());
 	}
 
-	public boolean validateCreateVehicleResponse(int requestId, Response response, BiConsumer<String, String> messageAndBodyConsumer) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 201, messageAndBodyConsumer)
-			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageAndBodyConsumer)) {
-			return false;
-		}
-		String locationHeader = response.header("Location");
+	public void validateCreateVehicleResponse(RequestResponseContext context) {
+		ResponseValidator.validateStatusCode(context, 201);
+		ResponseValidator.validateBodyNotNull(context);
+		String locationHeader = context.getResponse().header("Location");
 		if (locationHeader == null) {
-			messageAndBodyConsumer.accept("missing location header", null);
-			return false;
+			context.addErrorMessage("missing location header");
+			return;
 		}
 		String uuidString = locationHeader.replaceAll("^.*/jarmuvek/", "");
 		try {
 			UUID uuid = UUID.fromString(uuidString);
-			Vehicle sentVehicle = sentVehicles.get(requestId);
+			Vehicle sentVehicle = sentVehicles.get(context.requestId);
 			Vehicle storedVehicle = new Vehicle(uuid, sentVehicle.registration(), sentVehicle.owner(), sentVehicle.validity(), sentVehicle.data());
 			storedVehicles.add(storedVehicle);
-			sentVehicles.remove(requestId);
+			sentVehicles.remove(context.requestId);
 		} catch (Exception exception) {
-			messageAndBodyConsumer.accept("invalid uuid (%s) returned. Check Location header. UUID string I tried to decode: %s".formatted(exception.getMessage(), uuidString), null);
-			return false;
+			context.addErrorMessage(
+				"invalid uuid (%s) returned. Check Location header. UUID string I tried to decode: %s"
+					.formatted(exception.getMessage(), uuidString)
+			);
 		}
-		return true;
 	}
 
-	public Optional<Request> getVehicle(int requestId, String base) {
+	public Optional<Request> getVehicleRequest(int requestId, String base) {
 		if (storedVehicles.isEmpty()) {
 			return Optional.empty();
 		}
@@ -77,32 +75,29 @@ public class VehicleTracker {
 		return Optional.of(RequestBuilder.getVehicleRequest(base, uuid));
 	}
 
-	public boolean validateGetVehicleResponse(int requestId, Response response, BiConsumer<String, String> messageAndBodyConsumer) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageAndBodyConsumer)
-			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageAndBodyConsumer)) {
-			return false;
+	public void validateGetVehicleResponse(RequestResponseContext context) {
+		ResponseValidator.validateStatusCode(context, 200);
+		ResponseValidator.validateBodyNotNull(context);
+		if (context.getResponseBody().isBlank()) {
+			return;
 		}
-		assert response.body() != null;
 		try {
-			String body = response.body().string();
+			String body = context.getResponseBody();
 			Vehicle receivedVehicle = objectMapper.readValue(body, Vehicle.class);
-			int vehicleId = queriedVehicles.remove(requestId);
+			int vehicleId = queriedVehicles.remove(context.requestId);
 			Vehicle expectedVehicle = storedVehicles.get(vehicleId);
 			if (!expectedVehicle.equals(receivedVehicle)) {
-				messageAndBodyConsumer.accept(
-					"invalid vehicle returned: RECEIVED: %s, EXPECTED: %s".formatted(receivedVehicle.toString(), expectedVehicle.toString()),
-					body
+				context.addErrorMessage(
+					"invalid vehicle returned: RECEIVED: %s, EXPECTED: %s"
+						.formatted(receivedVehicle.toString(), expectedVehicle.toString())
 				);
-				return false;
 			}
 		} catch (Exception exception) {
-			messageAndBodyConsumer.accept("failed to parse vehicle: %s".formatted(exception.getMessage()), null);
-			return false;
+			context.addErrorMessage("failed to parse vehicle: %s".formatted(exception.getMessage()));
 		}
-		return true;
 	}
 
-	public Optional<Request> searchOneVehicle(int requestId, String base) {
+	public Optional<Request> searchOneVehicleRequest(int requestId, String base) {
 		if (storedVehicles.isEmpty()) {
 			return Optional.empty();
 		}
@@ -111,49 +106,43 @@ public class VehicleTracker {
 		return Optional.of(RequestBuilder.searchVehiclesRequest(base, storedVehicles.get(vehicleId).registration()));
 	}
 
-	public boolean validateSearchVehicleResponse(int requestId, Response response, BiConsumer<String, String> messageAndBodyConsumer) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageAndBodyConsumer)
-			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageAndBodyConsumer)) {
-			return false;
+	public void validateSearchVehicleResponse(RequestResponseContext context) {
+		ResponseValidator.validateStatusCode(context, 200);
+		ResponseValidator.validateBodyNotNull(context);
+		if (context.getResponseBody().isBlank()) {
+			return;
 		}
-		assert response.body() != null;
 		try {
-			String body = response.body().string();
+			String body = context.getResponseBody();
 			List<Vehicle> receivedVehicles = objectMapper.readValue(body, new TypeReference<>() {});
-			int vehicleId = queriedVehicles.remove(requestId);
+			int vehicleId = queriedVehicles.remove(context.requestId);
 			List<Vehicle> expectedVehicles = List.of(storedVehicles.get(vehicleId));
 			if (!expectedVehicles.equals(receivedVehicles)) {
-				messageAndBodyConsumer.accept(
-					"invalid list of vehicles returned: RECEIVED: %s, EXPECTED: %s".formatted(receivedVehicles.toString(), expectedVehicles.toString()),
-					body
+				context.addErrorMessage(
+					"invalid list of vehicles returned: RECEIVED: %s, EXPECTED: %s"
+						.formatted(receivedVehicles.toString(), expectedVehicles.toString())
 				);
-				return false;
 			}
 		} catch (Exception exception) {
-			messageAndBodyConsumer.accept("failed to parse vehicle: %s".formatted(exception.getMessage()), null);
-			return false;
+			context.addErrorMessage("failed to parse vehicle: %s".formatted(exception.getMessage()));
 		}
-		return true;
 	}
 
-	public boolean validateCountVehiclesResponse(int requestId, Response response, Function<Integer, Boolean> countValidatorFunction, BiConsumer<String, String> messageAndBodyConsumer) {
-		if (!ResponseValidator.validateStatusCode(requestId, response, 200, messageAndBodyConsumer)
-			|| !ResponseValidator.validateBodyNotNull(requestId, response, messageAndBodyConsumer)) {
-			return false;
+	public void validateCountVehiclesResponse(RequestResponseContext context, Function<Integer, Boolean> countValidatorFunction) {
+		ResponseValidator.validateStatusCode(context, 200);
+		ResponseValidator.validateBodyNotNull(context);
+		if (context.getResponseBody().isBlank()) {
+			return;
 		}
-		assert response.body() != null;
 		try {
-			String body = response.body().string();
+			String body = context.getResponseBody();
 			Integer actualCount = Integer.parseInt(body);
 			if (!countValidatorFunction.apply(actualCount)) {
-				messageAndBodyConsumer.accept("count of vehicles too different from expectation: got %d".formatted(actualCount), body);
-				return false;
+				context.addErrorMessage("count of vehicles too different from expectation: got %d".formatted(actualCount));
 			}
 		} catch (Exception exception) {
-			messageAndBodyConsumer.accept("failed to parse result: %s".formatted(exception.getMessage()), null);
-			return false;
+			context.addErrorMessage("failed to parse result: %s".formatted(exception.getMessage()));
 		}
-		return true;
 	}
 
 }

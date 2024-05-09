@@ -1,5 +1,6 @@
 package hu.laba.tests;
 
+import hu.laba.RequestResponseContext;
 import okhttp3.Request;
 
 import java.nio.file.Path;
@@ -16,22 +17,18 @@ public class SearchTest extends AbstractTest {
 		return "SearchVehicles";
 	}
 
-	private Request searchOneVehicleTest(int requestId) {
-		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicle(requestId, base);
+	private RequestResponseContext searchOneVehicleTest(int requestId) {
+		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicleRequest(requestId, base);
 		if (optionalRequest.isEmpty()) {
 			throw new IllegalStateException("no vehicles to search?");
 		} else {
-			validators.put(requestId,
-				response -> vehicleTracker.validateSearchVehicleResponse(requestId, response,
-					forwardInvalidResponseMessage(requestId, optionalRequest.get(), response)
-				)
-			);
-			return optionalRequest.get();
+			validators.put(requestId, vehicleTracker::validateSearchVehicleResponse);
+			return new RequestResponseContext(requestId, optionalRequest.get());
 		}
 	}
 
 	@Override
-	public Request buildRequest(int requestId) {
+	public RequestResponseContext buildRequest(int requestId) {
 		return searchOneVehicleTest(requestId);
 	}
 
