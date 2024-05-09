@@ -1,38 +1,29 @@
 package hu.laba;
 
-import okhttp3.Response;
-
-import java.util.function.BiConsumer;
-
 public interface ResponseValidator {
 
-	ResponseValidator ALWAYS_VALID_VALIDATOR = (requestId, response) -> true;
+	ResponseValidator ALWAYS_VALID_VALIDATOR = (ignored) -> {};
 
-	static boolean validateStatusCode(int requestId, Response response, int expectedCode, BiConsumer<String, String> messageAndBodyConsumer) {
-		int actualCode = response.code();
+	static void validateStatusCode(RequestResponseContext context, int expectedCode) {
+		int actualCode = context.getResponse().code();
 		if (expectedCode < 10) {
 			int actualCodeGroup = actualCode / 100;
 			if (actualCodeGroup != expectedCode) {
-				messageAndBodyConsumer.accept("expected status code %dxx, got %d".formatted(expectedCode, actualCode), null);
-				return false;
+				context.addErrorMessage("expected status code %dxx, got %d".formatted(expectedCode, actualCode));
 			}
 		} else {
 			if (actualCode != expectedCode) {
-				messageAndBodyConsumer.accept("expected status code %d, got %d".formatted(expectedCode, actualCode), null);
-				return false;
+				context.addErrorMessage("expected status code %d, got %d".formatted(expectedCode, actualCode));
 			}
 		}
-		return true;
 	}
 
-	static boolean validateBodyNotNull(int requestId, Response response, BiConsumer<String, String> messageAndBodyConsumer) {
-		if (response.body() == null) {
-			messageAndBodyConsumer.accept("missing body", null);
-			return false;
+	static void validateBodyNotNull(RequestResponseContext context) {
+		if (context.getResponseBody().isBlank()) {
+			context.addErrorMessage("missing body");
 		}
-		return true;
 	}
 
-	Boolean validateResponse(int requestId, Response response);
+	void validateResponse(RequestResponseContext context);
 
 }

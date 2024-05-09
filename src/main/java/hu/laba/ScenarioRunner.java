@@ -43,10 +43,8 @@ public class ScenarioRunner {
 			.build();
 	}
 
-	private Callback buildCallback(AtomicInteger completedRequests, ScenarioLogger scenarioLogger, Integer requestId, ResponseValidator responseValidator) {
+	private Callback buildCallback(AtomicInteger completedRequests, ScenarioLogger scenarioLogger, RequestResponseContext context, ResponseValidator responseValidator) {
 		return new Callback() {
-
-			private final int REQUEST_ID = requestId;
 
 			@Override
 			public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -56,7 +54,9 @@ public class ScenarioRunner {
 			@Override
 			public void onResponse(@NotNull Call call, @NotNull Response response) {
 				completedRequests.incrementAndGet();
-				if (responseValidator.validateResponse(REQUEST_ID, response)) {
+				context.setResponse(response);
+				responseValidator.validateResponse(context);
+				if (context.isValid()) {
 					scenarioLogger.recordValidRequest();
 				}
 				response.close();
@@ -87,7 +87,8 @@ public class ScenarioRunner {
 				if (scenarioLogger.getInflightRequests() > scenario.getMaximumInflightRequests()) {
 					continue;
 				}
-				client.newCall(scenario.buildRequest(currentRequest)).enqueue(buildCallback(completedRequests, scenarioLogger, currentRequest, scenario));
+				RequestResponseContext requestResponseContext = scenario.buildRequest(currentRequest);
+				client.newCall(requestResponseContext.request).enqueue(buildCallback(completedRequests, scenarioLogger, requestResponseContext, scenario));
 				currentRequest++;
 				scheduledRequests++;
 				if (timeKeeper.now() - lastUpdate > 2) {

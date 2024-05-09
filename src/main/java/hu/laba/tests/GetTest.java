@@ -1,6 +1,6 @@
 package hu.laba.tests;
 
-import okhttp3.Request;
+import hu.laba.RequestResponseContext;
 
 import java.nio.file.Path;
 
@@ -15,12 +15,13 @@ public class GetTest extends AbstractTest {
 		return "GetVehicles";
 	}
 
-	private Request getVehicleTestOrFail(int requestId) {
-		return getVehicleTest(requestId).orElseThrow(() -> new IllegalStateException("no vehicles available to get?"));
+	private RequestResponseContext getVehicleTestOrFail(int requestId) {
+		return getVehicleTest(requestId)
+			.orElseThrow(() -> new IllegalStateException("no vehicles available to get?"));
 	}
 
 	@Override
-	public Request buildRequest(int requestId) {
+	public RequestResponseContext buildRequest(int requestId) {
 		return getVehicleTestOrFail(requestId);
 	}
 

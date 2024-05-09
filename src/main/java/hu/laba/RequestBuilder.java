@@ -49,6 +49,6 @@ public interface RequestBuilder {
 		return "<lambda>";
 	}
 
-	Request buildRequest(int requestId);
+	RequestResponseContext buildRequest(int requestId);
 
 }

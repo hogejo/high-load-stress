@@ -1,10 +1,10 @@
 package hu.laba.tests;
 
 import hu.laba.RequestBuilder;
+import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
 import hu.laba.ResponseValidatorFunction;
 import okhttp3.Request;
-import okhttp3.Response;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +13,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public abstract class AbstractTest implements RequestBuilder, ResponseValidator {
 
@@ -32,54 +32,51 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 	public abstract String getDescription();
 
 	@Override
-	public abstract Request buildRequest(int requestId);
+	public abstract RequestResponseContext buildRequest(int requestId);
 
 	@Override
-	public Boolean validateResponse(int requestId, Response response) {
-		return validators.get(requestId).apply(response);
-	}
-
-	protected Request createVehicleTest(int requestId) {
-		Request request = vehicleTracker.createVehicle(requestId, base, vehicleTracker.createNewRandomVehicle());
-		validators.put(requestId,
-			response -> vehicleTracker.validateCreateVehicleResponse(requestId, response,
-				forwardInvalidResponseMessage(requestId, request, response)
-			)
-		);
-		return request;
-	}
-
-	protected Optional<Request> getVehicleTest(int requestId) {
-		Optional<Request> optionalRequest = vehicleTracker.getVehicle(requestId, base);
-		optionalRequest.ifPresent(request -> validators.put(requestId,
-			response -> vehicleTracker.validateGetVehicleResponse(requestId, response,
-				forwardInvalidResponseMessage(requestId, request, response)
-			)
-		));
-		return optionalRequest;
-	}
-
-	protected void dumpInvalidResponse(int requestId, Request request, Response response, String responseBody, String message) {
-		String output = "== Response to request #%d was invalid: %s%n".formatted(requestId, message);
-		output += "== %s request went to %s%n".formatted(request.method(), request.url());
-		output += "== Request headers were: %n%s%n".formatted(response.headers());
-		output += "== Response status code was %d%n".formatted(response.code());
-		output += "== Response headers were: %n%s%n".formatted(response.headers());
-		if (responseBody == null && response.body() != null) {
-			try {
-				responseBody = response.body().string();
-			} catch (IOException exception) {
-				System.err.println("Exception while trying to read response body: " + exception.getMessage());
-			}
+	public void validateResponse(RequestResponseContext context) {
+		validators.get(context.requestId).accept(context);
+		if (!context.isValid()) {
+			dumpInvalidResponse(context);
 		}
-		if (responseBody != null) {
-			output += "== Response body was:%n%s%n".formatted(responseBody);
-		} else {
-			output += "== Response body was empty.\n";
+	}
+
+	protected RequestResponseContext createVehicleTest(int requestId) {
+		Request request = vehicleTracker.createVehicleRequest(requestId, base, vehicleTracker.createNewRandomVehicle());
+		validators.put(requestId, vehicleTracker::validateCreateVehicleResponse);
+		return new RequestResponseContext(requestId, request);
+	}
+
+	protected Optional<RequestResponseContext> getVehicleTest(int requestId) {
+		Optional<Request> optionalRequest = vehicleTracker.getVehicleRequest(requestId, base);
+		if (optionalRequest.isPresent()) {
+			validators.put(requestId, vehicleTracker::validateGetVehicleResponse);
+			return Optional.of(new RequestResponseContext(requestId, optionalRequest.get()));
 		}
+		return Optional.empty();
+	}
+
+	protected void dumpInvalidResponse(RequestResponseContext context) {
 		if (dumpDirectory != null) {
-			System.err.printf("Request #%d is invalid. See dump for details.%n", requestId);
-			Path outputFilePath = dumpDirectory.resolve("%d.txt".formatted(requestId));
+			System.err.printf("Request #%d is invalid. See dump for details.%n", context.requestId);
+			String output = "== Response to request #%d was invalid. Reasons:%n".formatted(context.requestId);
+			output += context.getErrorMessages().stream()
+				.map(m -> "  " + m + "\n")
+				.collect(Collectors.joining());
+			// Request
+			output += "== %s request went to %s%n".formatted(context.request.method(), context.request.url());
+			output += "== Request headers were: %n%s%n".formatted(context.request.headers());
+			// Response
+			output += "== Response status code was %d%n".formatted(context.getResponse().code());
+			output += "== Response headers were: %n%s%n".formatted(context.getResponse().headers());
+			String responseBody = context.getResponseBody();
+			if (!responseBody.isBlank()) {
+				output += "== Response body was:%n%s%n".formatted(responseBody);
+			} else {
+				output += "== Response body was empty.\n";
+			}
+			Path outputFilePath = dumpDirectory.resolve("%d.txt".formatted(context.requestId));
 			try {
 				if (Files.exists(outputFilePath)) {
 					System.err.println("Overwriting existing dump file: " + outputFilePath);
@@ -90,12 +87,8 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 				System.err.print(output);
 			}
 		} else {
-			System.err.print(output);
+			System.err.printf("Request #%d is invalid. Enable dumping for details.%n", context.requestId);
 		}
-	}
-
-	protected BiConsumer<String, String> forwardInvalidResponseMessage(int requestId, Request request, Response response) {
-		return (message, body) -> dumpInvalidResponse(requestId, request, response, body, message);
 	}
 
 }

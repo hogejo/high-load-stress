@@ -1,9 +1,7 @@
 package hu.laba;
 
-import okhttp3.Response;
-
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface ResponseValidatorFunction extends Function<Response, Boolean> {
+public interface ResponseValidatorFunction extends Consumer<RequestResponseContext> {
 }
