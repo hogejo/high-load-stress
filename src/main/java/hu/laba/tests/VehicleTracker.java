@@ -105,25 +105,34 @@ public class VehicleTracker {
 		return Optional.of(RequestBuilder.searchVehiclesRequest(base, storedVehicles.get(vehicleId).registration()));
 	}
 
-	public void validateSearchVehicleResponse(RequestResponseContext context) {
-		ResponseValidator.validateStatusCode(context, 200);
+	public List<Vehicle> readListOfVehicles(RequestResponseContext context) {
 		ResponseValidator.validateBodyNotBlank(context);
 		if (context.getResponseBody().isBlank()) {
-			return;
+			context.addErrorMessage("missing list of vehicles");
+			return null;
 		}
 		try {
 			String body = context.getResponseBody();
-			List<Vehicle> receivedVehicles = objectMapper.readValue(body, new TypeReference<>() {});
-			int vehicleId = queriedVehicles.remove(context.requestId);
-			List<Vehicle> expectedVehicles = List.of(storedVehicles.get(vehicleId));
-			if (!expectedVehicles.equals(receivedVehicles)) {
-				context.addErrorMessage(
-					"invalid list of vehicles returned: RECEIVED: %s, EXPECTED: %s"
-						.formatted(receivedVehicles.toString(), expectedVehicles.toString())
-				);
-			}
+			return objectMapper.readValue(body, new TypeReference<>() {});
 		} catch (Exception exception) {
-			context.addErrorMessage("failed to parse vehicle: %s".formatted(exception.getMessage()));
+			context.addErrorMessage("failed to parse vehicles: %s".formatted(exception.getMessage()));
+			return null;
+		}
+	}
+
+	public void validateSearchVehicleResponse(RequestResponseContext context) {
+		ResponseValidator.validateStatusCode(context, 200);
+		List<Vehicle> receivedVehicles = readListOfVehicles(context);
+		if (receivedVehicles == null) {
+			return;
+		}
+		int vehicleId = queriedVehicles.remove(context.requestId);
+		List<Vehicle> expectedVehicles = List.of(storedVehicles.get(vehicleId));
+		if (!expectedVehicles.equals(receivedVehicles)) {
+			context.addErrorMessage(
+				"invalid list of vehicles returned: RECEIVED: %s, EXPECTED: %s"
+					.formatted(receivedVehicles.toString(), expectedVehicles.toString())
+			);
 		}
 	}
 
