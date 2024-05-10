@@ -18,7 +18,7 @@ public interface ResponseValidator {
 		}
 	}
 
-	static void validateBodyNotNull(RequestResponseContext context) {
+	static void validateBodyNotBlank(RequestResponseContext context) {
 		if (context.getResponseBody().isBlank()) {
 			context.addErrorMessage("missing body");
 		}

@@ -27,7 +27,8 @@ public class StressTest extends AbstractTest {
 		Request request = RequestBuilder.searchVehiclesRequest(base, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
 		validators.put(requestId, context -> {
 			ResponseValidator.validateStatusCode(context, 200);
-			ResponseValidator.validateBodyNotNull(context);
+			ResponseValidator.validateBodyNotBlank(context);
+			// TODO: read body as JSON
 		});
 		return new RequestResponseContext(requestId, request);
 	}
