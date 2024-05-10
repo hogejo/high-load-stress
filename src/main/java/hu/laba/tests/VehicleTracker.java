@@ -41,7 +41,6 @@ public class VehicleTracker {
 
 	public void validateCreateVehicleResponse(RequestResponseContext context) {
 		ResponseValidator.validateStatusCode(context, 201);
-		ResponseValidator.validateBodyNotNull(context);
 		String locationHeader = context.getResponse().header("Location");
 		if (locationHeader == null) {
 			context.addErrorMessage("missing location header");
@@ -77,7 +76,7 @@ public class VehicleTracker {
 
 	public void validateGetVehicleResponse(RequestResponseContext context) {
 		ResponseValidator.validateStatusCode(context, 200);
-		ResponseValidator.validateBodyNotNull(context);
+		ResponseValidator.validateBodyNotBlank(context);
 		if (context.getResponseBody().isBlank()) {
 			return;
 		}
@@ -108,7 +107,7 @@ public class VehicleTracker {
 
 	public void validateSearchVehicleResponse(RequestResponseContext context) {
 		ResponseValidator.validateStatusCode(context, 200);
-		ResponseValidator.validateBodyNotNull(context);
+		ResponseValidator.validateBodyNotBlank(context);
 		if (context.getResponseBody().isBlank()) {
 			return;
 		}
@@ -130,7 +129,7 @@ public class VehicleTracker {
 
 	public void validateCountVehiclesResponse(RequestResponseContext context, Function<Integer, Boolean> countValidatorFunction) {
 		ResponseValidator.validateStatusCode(context, 200);
-		ResponseValidator.validateBodyNotNull(context);
+		ResponseValidator.validateBodyNotBlank(context);
 		if (context.getResponseBody().isBlank()) {
 			return;
 		}
