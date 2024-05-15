@@ -15,9 +15,7 @@ public class TimeKeeper {
 		zeroTime = System.currentTimeMillis();
 	}
 
-	public float now() {
-		long nowMillis = System.currentTimeMillis() - zeroTime;
-		float now = nowMillis / 1000f;
+	private void maybeTick(float now) {
 		if (tickFunction != null && now > lastTick + tickTime) {
 			synchronized (this) {
 				if (now > lastTick + tickTime) {
@@ -26,6 +24,12 @@ public class TimeKeeper {
 				}
 			}
 		}
+	}
+
+	public float now() {
+		long nowMillis = System.currentTimeMillis() - zeroTime;
+		float now = nowMillis / 1000f;
+		maybeTick(now);
 		return now;
 	}
 

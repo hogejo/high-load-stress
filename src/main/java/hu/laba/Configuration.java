@@ -2,10 +2,14 @@ package hu.laba;
 
 import com.beust.jcommander.Parameter;
 
+import java.util.regex.Pattern;
+
 public class Configuration {
 
 	@Parameter(order = 0, names = "--help", help = true, description = "Show help/usage")
 	public boolean help = false;
+
+	public static final Pattern endpointPattern = Pattern.compile("^([^\\-][a-z0-9\\-.]+)?:[0-9]{2,5}$", Pattern.CASE_INSENSITIVE);
 
 	@Parameter(order = 10, names = "--endpoint", description = "Endpoint to run against in `host:port` format")
 	public String endpoint = "localhost:8080";
