@@ -27,9 +27,8 @@ public class Stress {
 			.addObject(configuration)
 			.build();
 		jCommander.parse(arguments);
-		String endpointRegex = "^[a-z.]+:[0-9]{2,5}$";
-		if (!configuration.endpoint.matches(endpointRegex)) {
-			System.err.println("Endpoint does not match regex: " + endpointRegex);
+		if (!Configuration.endpointPattern.matcher(configuration.endpoint).matches()) {
+			System.err.println("Endpoint does not match regex: " + Configuration.endpointPattern);
 			System.exit(1);
 		}
 		Path timelineOutputPath = Path.of(configuration.timelineOutput);
