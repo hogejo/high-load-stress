@@ -160,6 +160,8 @@ public class Stress {
 		scenarioLogger.getBuckets().forEach(s -> System.out.println("  " + s));
 		System.out.println("Fail reasons are:");
 		scenarioLogger.getFailReasons().forEach(s -> System.out.println("  " + s));
+		System.out.println("Fail details are:");
+		scenarioLogger.getFailDetails().forEach(System.out::println);
 	}
 
 }

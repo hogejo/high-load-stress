@@ -8,6 +8,8 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -96,6 +98,7 @@ public class ScenarioLogger extends EventListener {
 	private final List<Integer> allLatencies = new CopyOnWriteArrayList<>();
 	private final PriorityBlockingQueue<Float> requestTimestamps = new PriorityBlockingQueue<>();
 	private final ConcurrentHashMap<String, AtomicInteger> failReasons = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, String> failDetails = new ConcurrentHashMap<>();
 
 	// Latency buckets
 	private final Map<Call, Long> requestStartTimes = new ConcurrentHashMap<>();
@@ -208,6 +211,10 @@ public class ScenarioLogger extends EventListener {
 		return failReasons.entrySet().stream().map(e -> "%s,%d".formatted(e.getKey(), e.getValue().get())).toList();
 	}
 
+	public List<String> getFailDetails() {
+		return failDetails.entrySet().stream().map(e -> "== %s:\n%s".formatted(e.getKey(), e.getValue())).toList();
+	}
+
 	public void recordValidRequest() {
 		validResponses.incrementAndGet();
 	}
@@ -245,6 +252,12 @@ public class ScenarioLogger extends EventListener {
 		failedRequests.incrementAndGet();
 		maybeCreateDataPoint();
 		failReasons.computeIfAbsent(ioe.getMessage(), key -> new AtomicInteger()).incrementAndGet();
+		failDetails.computeIfAbsent(ioe.getMessage(), key -> {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			ioe.printStackTrace(pw);
+			return sw.toString();
+		});
 	}
 
 }
