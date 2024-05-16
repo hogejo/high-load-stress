@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -30,11 +32,16 @@ class VehicleTests {
 	}
 
 	@Test
-	public void generateRandomVehicle() {
-		for (int i = 0; i < 1999; i++) {
+	public void generateUniqueRandomVehicles() {
+		Set<Vehicle> vehicles = new HashSet<>();
+		for (int i = 0; i < 100_000; i++) {
 			Vehicle vehicle = VehicleGenerator.generateRandom(i);
 			vehicle.requireValid();
+			vehicles.add(vehicle);
+			assertEquals(i + 1, vehicles.size());
 		}
+		Set<String> vehicleRegistrations = vehicles.stream().map(Vehicle::registration).collect(Collectors.toSet());
+		assertEquals(vehicles.size(), vehicleRegistrations.size());
 	}
 
 	@Test
