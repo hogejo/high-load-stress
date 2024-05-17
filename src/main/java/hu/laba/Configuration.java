@@ -2,25 +2,61 @@ package hu.laba;
 
 import com.beust.jcommander.Parameter;
 
-import java.util.regex.Pattern;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Configuration {
 
 	@Parameter(order = 0, names = "--help", help = true, description = "Show help/usage")
 	public boolean help = false;
 
-	public static final Pattern endpointPattern = Pattern.compile("^([^\\-][a-z0-9\\-.]+)?:[0-9]{2,5}$", Pattern.CASE_INSENSITIVE);
+	@Parameter(order = 10, names = "--listScenarios", description = "List available scenarios to run, then exit.")
+	public boolean listScenarios = false;
 
-	@Parameter(order = 10, names = "--endpoint", description = "Endpoint to run against in `host:port` format")
+	@Parameter(order = 11, names = "--scenario", description = "Scenario to run")
+	public String scenario;
+
+	@Parameter(order = 20, names = "--endpoint", description = "Endpoint to run against")
 	public String endpoint = "localhost:8080";
 
-	@Parameter(order = 20, names = "--timelineOutput", description = "Output of timeline CSV")
-	public String timelineOutput = "./timeline.csv";
+	@Parameter(order = 30, names = "--timelineOutput", description = "Output of timeline CSV")
+	public Path timelineOutput = Path.of("./timeline.csv");
 
-	@Parameter(order = 30, names = "--dumpRequests", description = "Whether to dump invalid responses")
-	public boolean dumpRequests = false;
+	@Parameter(order = 40, names = "--dump", description = "Whether to dump invalid and/or failed responses")
+	public boolean dump = false;
 
-	@Parameter(order = 31, names = "--requestDumpDirectory", description = "Output directory for dumping invalid response details. Existing files will be overwritten.")
-	public String requestDumpDirectory = "./dump";
+	@Parameter(order = 41, names = "--dumpDirectory", description = "Output directory for dumping request response details (existing files will be overwritten).")
+	public Path dumpDirectory = Path.of("./dump");
+
+	@SuppressWarnings("HttpUrlsUsage")
+	public void validate() {
+		if (Files.exists(timelineOutput) && !Files.isWritable(timelineOutput)) {
+			System.err.println("Can't write to file: " + timelineOutput);
+			System.exit(1);
+		}
+		if (!Files.exists(timelineOutput) && !Files.isWritable(timelineOutput.getParent())) {
+			System.err.println("Can't create file: " + timelineOutput.getParent());
+			System.exit(1);
+		}
+		if (dump) {
+			if (!Files.exists(dumpDirectory)) {
+				try {
+					Files.createDirectory(dumpDirectory);
+					System.out.println("Created directory for dumping invalid responses: " + dumpDirectory);
+				} catch (IOException exception) {
+					System.err.printf("Can't create directory %s: %s%n", dumpDirectory, exception);
+					System.exit(1);
+				}
+			}
+			if (!Files.isDirectory(dumpDirectory)) {
+				System.err.println("Dump directory is not a directory: " + dumpDirectory);
+				System.exit(1);
+			}
+		}
+		if (!endpoint.startsWith("http://")) {
+			endpoint = "http://" + endpoint;
+		}
+	}
 
 }

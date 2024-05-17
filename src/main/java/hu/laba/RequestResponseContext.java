@@ -1,5 +1,6 @@
 package hu.laba;
 
+import hu.laba.scenarios.Scenario;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
@@ -10,13 +11,15 @@ import java.util.List;
 
 public class RequestResponseContext {
 
+	public final Scenario scenario;
 	public final int requestId;
 	public final Request request;
 	private Response response = null;
 	private String responseBody = null;
 	private final List<String> errorMessages = new ArrayList<>();
 
-	public RequestResponseContext(int requestId, @NotNull Request request) {
+	public RequestResponseContext(Scenario scenario, int requestId, @NotNull Request request) {
+		this.scenario = scenario;
 		this.requestId = requestId;
 		this.request = request;
 	}

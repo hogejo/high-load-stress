@@ -1,73 +1,27 @@
 package hu.laba.scenarios;
 
 import hu.laba.RequestBuilder;
-import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
+import hu.laba.tests.Tester;
 
-/**
- * Base class for all scenarios, with basic implementation for name and duration.
- */
-public abstract class Scenario implements RequestBuilder, ResponseValidator {
+public interface Scenario extends RequestBuilder, ResponseValidator {
 
-	protected final String name;
-	protected final float durationInSeconds;
-	protected final RequestBuilder requestBuilder;
-	protected final ResponseValidator responseValidator;
-	protected int maximumInflightRequests = Integer.MAX_VALUE;
+	String getIdentifier();
 
-	/**
-	 * Create a scenario with the given {@code name} and duration (in seconds).
-	 * @param name name of the scenario
-	 * @param durationInSeconds duration of the scenario in seconds
-	 */
-	protected Scenario(String name, float durationInSeconds, RequestBuilder requestBuilder, ResponseValidator responseValidator) {
-		this.name = name;
-		this.durationInSeconds = durationInSeconds;
-		this.requestBuilder = requestBuilder;
-		this.responseValidator = responseValidator;
-	}
+	String getDescription();
 
-	public String getName() {
-		return this.name + "-for-%.1fs".formatted(durationInSeconds);
-	}
+	Tester getTester();
 
-	public String getDescription() {
-		return "%s for %.2f seconds".formatted(this.getClass().getSimpleName(), durationInSeconds);
-	}
+	float getDurationInSeconds();
 
-	public String getRequestBuilderDescription() {
-		return "Building requests with " + requestBuilder.getDescription();
-	}
+	boolean isOver(float time);
 
-	public float getDurationInSeconds() {
-		return durationInSeconds;
-	}
+	int getTotalRequests();
 
-	public boolean isOver(float time) {
-		return time > durationInSeconds;
-	}
+	int getRequestCountAtTime(float time);
 
-	public abstract int getTotalRequests();
+	Scenario withMaximumInFlightRequests(int maximumInFlightRequests);
 
-	public Scenario withMaximumInflightRequests(int maximumInflightRequests) {
-		this.maximumInflightRequests = maximumInflightRequests;
-		return this;
-	}
-
-	public int getMaximumInflightRequests() {
-		return maximumInflightRequests;
-	}
-
-	public abstract int getRequestCountAtTime(float time);
-
-	@Override
-	public RequestResponseContext buildRequest(int requestId) {
-		return requestBuilder.buildRequest(requestId);
-	}
-
-	@Override
-	public void validateResponse(RequestResponseContext context) {
-		responseValidator.validateResponse(context);
-	}
+	int getMaximumInFlightRequests();
 
 }

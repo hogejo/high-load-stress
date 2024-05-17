@@ -1,17 +1,16 @@
 package hu.laba.scenarios;
 
-import hu.laba.RequestBuilder;
-import hu.laba.ResponseValidator;
+import hu.laba.tests.Tester;
 
 /**
  * Scenario of immediate burst of requests at start, followed by a wait for the specified duration.
  */
-public class BurstScenario extends Scenario {
+public class BurstScenario extends AbstractScenario {
 
 	private final int totalRequests;
 
-	public BurstScenario(int totalRequests, float durationInSeconds, RequestBuilder requestBuilder, ResponseValidator responseValidator) {
-		super("single-burst-%d".formatted(totalRequests), durationInSeconds, requestBuilder, responseValidator);
+	public BurstScenario(int totalRequests, float durationInSeconds, Tester tester) {
+		super("burst-%d".formatted(totalRequests), durationInSeconds, tester);
 		this.totalRequests = totalRequests;
 	}
 

@@ -1,17 +1,16 @@
 package hu.laba.tests;
 
+import hu.laba.Configuration;
 import hu.laba.RequestBuilder;
 import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
 import hu.laba.VehicleGenerator;
 import okhttp3.Request;
 
-import java.nio.file.Path;
+public class StressVehicleTester extends AbstractVehicleTester {
 
-public class StressTest extends AbstractTest {
-
-	public StressTest(String base, VehicleTracker vehicleTracker, Path dumpDirectory) {
-		super(base, vehicleTracker, dumpDirectory);
+	public StressVehicleTester(Configuration configuration, VehicleTracker vehicleTracker) {
+		super(configuration, vehicleTracker);
 	}
 
 	@Override
@@ -24,13 +23,13 @@ public class StressTest extends AbstractTest {
 	}
 
 	private RequestResponseContext searchManyVehiclesTest(int requestId) {
-		Request request = RequestBuilder.searchVehiclesRequest(base, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
+		Request request = RequestBuilder.searchVehiclesRequest(configuration.endpoint, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
 		validators.put(requestId, context -> {
 			ResponseValidator.validateStatusCode(context, 200);
 			ResponseValidator.validateBodyNotBlank(context);
 			vehicleTracker.readListOfVehicles(context);
 		});
-		return new RequestResponseContext(requestId, request);
+		return new RequestResponseContext(scenario, requestId, request);
 	}
 
 	@Override

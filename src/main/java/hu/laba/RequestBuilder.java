@@ -8,11 +8,7 @@ import java.util.UUID;
 
 public interface RequestBuilder {
 
-	RequestBuilder NO_REQUEST_BUILDER = requestId -> {
-		throw new UnsupportedOperationException();
-	};
-
-	static Request createVehicleRequest(String base, String json) {
+	static Request createVehicleRequest(String endpoint, String json) {
 		return new Request.Builder()
 			.post(
 				RequestBody.create(
@@ -20,33 +16,29 @@ public interface RequestBuilder {
 					MediaType.get("application/json")
 				)
 			)
-			.url(base + "/jarmuvek")
+			.url(endpoint + "/jarmuvek")
 			.build();
 	}
 
-	static Request getVehicleRequest(String base, UUID uuid) {
+	static Request getVehicleRequest(String endpoint, UUID uuid) {
 		return new Request.Builder()
 			.get()
-			.url(base + "/jarmuvek/" + uuid.toString())
+			.url(endpoint + "/jarmuvek/" + uuid.toString())
 			.build();
 	}
 
-	static Request searchVehiclesRequest(String base, String keyword) {
+	static Request searchVehiclesRequest(String endpoint, String keyword) {
 		return new Request.Builder()
 			.get()
-			.url(base + "/kereses?q=" + keyword)
+			.url(endpoint + "/kereses?q=" + keyword)
 			.build();
 	}
 
-	static Request countVehiclesRequest(String base) {
+	static Request countVehiclesRequest(String endpoint) {
 		return new Request.Builder()
 			.get()
-			.url(base + "/jarmuvek")
+			.url(endpoint + "/jarmuvek")
 			.build();
-	}
-
-	default String getDescription() {
-		return "<lambda>";
 	}
 
 	RequestResponseContext buildRequest(int requestId);

@@ -1,15 +1,25 @@
 package hu.laba.scenarios;
 
-import hu.laba.RequestBuilder;
-import hu.laba.ResponseValidator;
+import hu.laba.RequestResponseContext;
+import hu.laba.tests.AbstractTester;
 
 /**
  * Scenario with no requests but a wait duration.
  */
-public class WaitScenario extends Scenario {
+public class WaitScenario extends AbstractScenario {
 
-	public WaitScenario(String name, float durationInSeconds) {
-		super(name, durationInSeconds, RequestBuilder.NO_REQUEST_BUILDER, ResponseValidator.ALWAYS_VALID_VALIDATOR);
+	public WaitScenario(float durationInSeconds) {
+		super("wait-%ds".formatted((int) durationInSeconds), durationInSeconds, new AbstractTester(null) {
+			@Override
+			public RequestResponseContext buildRequest(int requestId) {
+				throw new UnsupportedOperationException("not building requests");
+			}
+
+			@Override
+			public String getDescription() {
+				return "no requests";
+			}
+		});
 	}
 
 	@Override

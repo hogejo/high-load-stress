@@ -1,12 +1,11 @@
 package hu.laba.scenarios;
 
-import hu.laba.RequestBuilder;
-import hu.laba.ResponseValidator;
+import hu.laba.tests.Tester;
 
-public class SingleScenario extends Scenario {
+public class SingleScenario extends AbstractScenario {
 
-	public SingleScenario(String name, RequestBuilder requestBuilder, ResponseValidator responseValidator) {
-		super(name, 1, requestBuilder, responseValidator);
+	public SingleScenario(String name, Tester tester) {
+		super(name, 1, tester);
 	}
 
 	@Override

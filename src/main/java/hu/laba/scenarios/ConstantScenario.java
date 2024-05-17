@@ -1,20 +1,19 @@
 package hu.laba.scenarios;
 
-import hu.laba.RequestBuilder;
-import hu.laba.ResponseValidator;
+import hu.laba.tests.Tester;
 
 import static java.lang.Integer.min;
 
 /**
  * Scenario with a constant rate (request per second) of requests for the given duration.
  */
-public class ConstantScenario extends Scenario {
+public class ConstantScenario extends AbstractScenario {
 
 	private final int constantRequestsPerSecond;
 	private final int totalRequests;
 
-	public ConstantScenario(int constantRequestsPerSecond, float durationInSeconds, RequestBuilder requestBuilder, ResponseValidator responseValidator) {
-		super("constant-%d-rps".formatted(constantRequestsPerSecond), durationInSeconds, requestBuilder, responseValidator);
+	public ConstantScenario(String identifier, int constantRequestsPerSecond, float durationInSeconds, Tester tester) {
+		super(identifier, durationInSeconds, tester);
 		this.constantRequestsPerSecond = constantRequestsPerSecond;
 		this.totalRequests = (int) (constantRequestsPerSecond * durationInSeconds);
 	}

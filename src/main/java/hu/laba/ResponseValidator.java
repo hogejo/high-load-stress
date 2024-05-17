@@ -2,8 +2,6 @@ package hu.laba;
 
 public interface ResponseValidator {
 
-	ResponseValidator ALWAYS_VALID_VALIDATOR = (ignored) -> {};
-
 	static void validateStatusCode(RequestResponseContext context, int expectedCode) {
 		int actualCode = context.getResponse().code();
 		if (expectedCode < 10) {
