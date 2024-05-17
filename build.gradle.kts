@@ -5,10 +5,10 @@ plugins {
 // Application config
 
 group = "hu.laba"
-version = "7.2.0"
+version = "8.0.0"
 
 application {
-	mainClass.set("hu.laba.Stress")
+	mainClass.set("hu.laba.Application")
 }
 
 java {
@@ -27,6 +27,9 @@ repositories {
 }
 
 dependencies {
+	// Dagger
+	implementation(group = "com.google.dagger", name = "dagger", version = "2.51")
+	annotationProcessor(group = "com.google.dagger", name = "dagger-compiler", version = "2.51")
 	// OkHttp
 	// TODO: Upgrade to 5.0, with *actual* support for virtual threads
 	implementation(group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0")

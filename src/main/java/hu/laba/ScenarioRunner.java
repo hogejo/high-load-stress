@@ -66,10 +66,7 @@ public class ScenarioRunner {
 
 	@SuppressWarnings("BusyWait")
 	public void run() throws InterruptedException {
-		System.out.println();
-		System.out.printf("Executing scenario %s%n", scenario.getName());
-		System.out.println(scenario.getDescription());
-		System.out.println(scenario.getRequestBuilderDescription());
+		System.out.printf("Executing scenario %s%n", scenario.getIdentifier());
 		System.out.printf("This should take a total of %.2f seconds%n", scenario.getDurationInSeconds());
 		final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 		final OkHttpClient client = buildOkHttpClient(executorService);
@@ -84,7 +81,7 @@ public class ScenarioRunner {
 			expectedRequestCount = scenario.getRequestCountAtTime(timeKeeper.now());
 			long missingRequests = expectedRequestCount - scheduledRequests;
 			for (int i = 0; i < missingRequests; i++) {
-				if (scenarioLogger.getInflightRequests() > scenario.getMaximumInflightRequests()) {
+				if (scenarioLogger.getInflightRequests() > scenario.getMaximumInFlightRequests()) {
 					continue;
 				}
 				RequestResponseContext requestResponseContext = scenario.buildRequest(currentRequest);

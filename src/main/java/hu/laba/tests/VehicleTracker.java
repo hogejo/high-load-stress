@@ -9,6 +9,8 @@ import hu.laba.Vehicle;
 import hu.laba.VehicleGenerator;
 import okhttp3.Request;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+@Singleton
 public class VehicleTracker {
 
 	private final AtomicInteger nextVehicleId = new AtomicInteger(0);
@@ -25,6 +28,9 @@ public class VehicleTracker {
 	public final Map<Integer, Integer> queriedVehicles = new ConcurrentHashMap<>();
 	public final List<Vehicle> storedVehicles = new CopyOnWriteArrayList<>();
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
+	@Inject
+	public VehicleTracker() {}
 
 	public Vehicle createNewRandomVehicle() {
 		Vehicle vehicle = VehicleGenerator.generateRandom(nextVehicleId.getAndIncrement());

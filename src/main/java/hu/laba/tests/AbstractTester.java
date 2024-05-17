@@ -1,64 +1,51 @@
 package hu.laba.tests;
 
-import hu.laba.RequestBuilder;
+import hu.laba.Configuration;
 import hu.laba.RequestResponseContext;
-import hu.laba.ResponseValidator;
 import hu.laba.ResponseValidatorFunction;
-import okhttp3.Request;
+import hu.laba.scenarios.Scenario;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public abstract class AbstractTest implements RequestBuilder, ResponseValidator {
+public abstract class AbstractTester implements Tester {
 
-	protected final String base;
+	protected final Configuration configuration;
 	protected final Map<Integer, ResponseValidatorFunction> validators = new ConcurrentHashMap<>();
-	protected final VehicleTracker vehicleTracker;
-	protected final Path dumpDirectory;
+	protected Scenario scenario;
 
-	public AbstractTest(String base, VehicleTracker vehicleTracker, Path dumpDirectory) {
-		this.base = base;
-		this.vehicleTracker = vehicleTracker;
-		this.dumpDirectory = dumpDirectory;
+	public AbstractTester(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
-	public abstract String getDescription();
+	public String getDescription() {
+		return this.getClass().getSimpleName();
+	}
+
+	@Override
+	public void setScenario(Scenario scenario) {
+		this.scenario = scenario;
+	}
 
 	@Override
 	public abstract RequestResponseContext buildRequest(int requestId);
 
 	@Override
-	public void validateResponse(RequestResponseContext context) {
+	public final void validateResponse(RequestResponseContext context) {
 		validators.get(context.requestId).accept(context);
 		if (!context.isValid()) {
 			dumpInvalidResponse(context);
 		}
 	}
 
-	protected RequestResponseContext createVehicleTest(int requestId) {
-		Request request = vehicleTracker.createVehicleRequest(requestId, base, vehicleTracker.createNewRandomVehicle());
-		validators.put(requestId, vehicleTracker::validateCreateVehicleResponse);
-		return new RequestResponseContext(requestId, request);
-	}
-
-	protected Optional<RequestResponseContext> getVehicleTest(int requestId) {
-		Optional<Request> optionalRequest = vehicleTracker.getVehicleRequest(requestId, base);
-		if (optionalRequest.isPresent()) {
-			validators.put(requestId, vehicleTracker::validateGetVehicleResponse);
-			return Optional.of(new RequestResponseContext(requestId, optionalRequest.get()));
-		}
-		return Optional.empty();
-	}
-
 	protected void dumpInvalidResponse(RequestResponseContext context) {
-		if (dumpDirectory != null) {
+		if (configuration.dump) {
 			System.err.printf("Request #%d is invalid. See dump for details.%n", context.requestId);
 			String output = "== Response to request #%d was invalid. Reasons:%n".formatted(context.requestId);
 			output += context.getErrorMessages().stream()
@@ -76,7 +63,7 @@ public abstract class AbstractTest implements RequestBuilder, ResponseValidator 
 			} else {
 				output += "== Response body was empty.\n";
 			}
-			Path outputFilePath = dumpDirectory.resolve("%d.txt".formatted(context.requestId));
+			Path outputFilePath = configuration.dumpDirectory.resolve("%s-%d.txt".formatted(context.scenario.getIdentifier(), context.requestId));
 			try {
 				if (Files.exists(outputFilePath)) {
 					System.err.println("Overwriting existing dump file: " + outputFilePath);

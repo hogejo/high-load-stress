@@ -1,20 +1,19 @@
 package hu.laba.scenarios;
 
-import hu.laba.RequestBuilder;
-import hu.laba.ResponseValidator;
+import hu.laba.tests.Tester;
 
 import static java.lang.Integer.min;
 
 /**
  * Scenario with linearly increasing rate (requests per second)
  */
-public class LinearScenario extends Scenario {
+public class LinearScenario extends AbstractScenario {
 
 	private final int totalRequests;
 	private final float rateAtTheEnd;
 
-	public LinearScenario(int totalRequests, float durationInSeconds, RequestBuilder requestBuilder, ResponseValidator responseValidator) {
-		super("linear-%d".formatted(totalRequests), durationInSeconds, requestBuilder, responseValidator);
+	public LinearScenario(int totalRequests, float durationInSeconds, Tester tester) {
+		super("linear-%d".formatted(totalRequests), durationInSeconds, tester);
 		this.totalRequests = totalRequests;
 		this.rateAtTheEnd = (totalRequests * 2) / durationInSeconds;
 	}

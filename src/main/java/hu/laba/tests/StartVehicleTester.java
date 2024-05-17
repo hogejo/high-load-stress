@@ -1,5 +1,6 @@
 package hu.laba.tests;
 
+import hu.laba.Configuration;
 import hu.laba.RequestBuilder;
 import hu.laba.RequestResponseContext;
 import hu.laba.ResponseValidator;
@@ -7,20 +8,19 @@ import hu.laba.Vehicle;
 import hu.laba.VehicleGenerator;
 import okhttp3.Request;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class StartTest extends AbstractTest {
+public class StartVehicleTester extends AbstractVehicleTester {
 
-	public StartTest(String base, VehicleTracker vehicleTracker, Path dumpDirectory) {
-		super(base, vehicleTracker, dumpDirectory);
+	public StartVehicleTester(Configuration configuration, VehicleTracker vehicleTracker) {
+		super(configuration, vehicleTracker);
 	}
 
 	@Override
 	public String getDescription() {
-		return "StartTest(create, get, search, invalidCreate, invalidGet, invalidSearch)";
+		return "StartVehicleTester testing create, get, search APIs including invalid requests";
 	}
 
 	private RequestResponseContext getVehicleTestOrCreate(int requestId) {
@@ -28,12 +28,12 @@ public class StartTest extends AbstractTest {
 	}
 
 	private RequestResponseContext searchVehicleTest(int requestId) {
-		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicleRequest(requestId, base);
+		Optional<Request> optionalRequest = vehicleTracker.searchOneVehicleRequest(requestId, configuration.endpoint);
 		if (optionalRequest.isEmpty()) {
 			return createVehicleTest(requestId);
 		} else {
 			validators.put(requestId, vehicleTracker::validateSearchVehicleResponse);
-			return new RequestResponseContext(requestId, optionalRequest.get());
+			return new RequestResponseContext(scenario, requestId, optionalRequest.get());
 		}
 	}
 
@@ -44,7 +44,7 @@ public class StartTest extends AbstractTest {
 		String badSyntaxVehicleString = vehicle.toJsonString().replace("{", "");
 		int r = Math.abs(ThreadLocalRandom.current().nextInt()) % 4;
 		Request request = RequestBuilder.createVehicleRequest(
-			base,
+			configuration.endpoint,
 			switch (r) {
 				case 0 -> badSyntaxVehicleString;
 				case 1 ->
@@ -57,22 +57,22 @@ public class StartTest extends AbstractTest {
 			}
 		);
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 4));
-		return new RequestResponseContext(requestId, request);
+		return new RequestResponseContext(scenario, requestId, request);
 	}
 
 	private RequestResponseContext invalidGetVehicleTest(int requestId) {
-		Request request = RequestBuilder.getVehicleRequest(base, UUID.randomUUID());
+		Request request = RequestBuilder.getVehicleRequest(configuration.endpoint, UUID.randomUUID());
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 404));
-		return new RequestResponseContext(requestId, request);
+		return new RequestResponseContext(scenario, requestId, request);
 	}
 
 	private RequestResponseContext invalidSearchVehicleTest(int requestId) {
 		Request request = new Request.Builder()
 			.get()
-			.url(base + "/kereses")
+			.url(configuration.endpoint + "/kereses")
 			.build();
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 400));
-		return new RequestResponseContext(requestId, request);
+		return new RequestResponseContext(scenario, requestId, request);
 	}
 
 	@Override
