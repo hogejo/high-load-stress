@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Configuration {
 
@@ -14,8 +15,8 @@ public class Configuration {
 	@Parameter(order = 10, names = "--listScenarios", description = "List available scenarios to run, then exit.")
 	public boolean listScenarios = false;
 
-	@Parameter(order = 11, names = "--scenario", description = "Scenario to run")
-	public String scenario;
+	@Parameter(order = 11, names = {"--scenario", "--scenarios"}, description = "Scenarios to run")
+	public List<String> scenarios;
 
 	@Parameter(order = 20, names = "--endpoint", description = "Endpoint to run against")
 	public String endpoint = "localhost:8080";

@@ -5,6 +5,7 @@ import hu.laba.dagger.DaggerProductionComponent;
 import hu.laba.dagger.ProductionComponent;
 import hu.laba.scenarios.Scenario;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -34,15 +35,19 @@ public class Application {
 			listUniqueScenarios(scenarios);
 			return;
 		}
-		if (configuration.scenario != null && !configuration.scenario.isBlank()) {
-			Optional<Scenario> optionalScenario = scenarios.stream().filter(s -> s.getIdentifier().equals(configuration.scenario)).findFirst();
-			if (optionalScenario.isEmpty()) {
-				System.out.println("Can't find scenario: " + configuration.scenario);
-				return;
-			} else {
-				scenarios.clear();
-				scenarios.add(optionalScenario.get());
+		if (!configuration.scenarios.isEmpty()) {
+			List<Scenario> customScenarios = new ArrayList<>();
+			for (String identifier : configuration.scenarios) {
+				Optional<Scenario> optionalScenario = scenarios.stream().filter(s -> s.getIdentifier().equals(identifier)).findFirst();
+				if (optionalScenario.isEmpty()) {
+					System.out.println("Can't find scenario: " + identifier);
+					return;
+				} else {
+					customScenarios.add(optionalScenario.get());
+				}
 			}
+			scenarios.clear();
+			scenarios.addAll(customScenarios);
 		}
 		Stress stress = productionComponent.stress();
 		try {
