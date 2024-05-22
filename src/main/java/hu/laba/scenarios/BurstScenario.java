@@ -9,8 +9,8 @@ public class BurstScenario extends AbstractScenario {
 
 	private final int totalRequests;
 
-	public BurstScenario(int totalRequests, float durationInSeconds, Tester tester) {
-		super("burst-%d".formatted(totalRequests), durationInSeconds, tester);
+	public BurstScenario(String identifier, int totalRequests, float durationInSeconds, Tester tester) {
+		super(identifier, durationInSeconds, tester);
 		this.totalRequests = totalRequests;
 	}
 

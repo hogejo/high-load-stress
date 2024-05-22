@@ -12,8 +12,8 @@ public class LinearScenario extends AbstractScenario {
 	private final int totalRequests;
 	private final float rateAtTheEnd;
 
-	public LinearScenario(int totalRequests, float durationInSeconds, Tester tester) {
-		super("linear-%d".formatted(totalRequests), durationInSeconds, tester);
+	public LinearScenario(String identifier, int totalRequests, float durationInSeconds, Tester tester) {
+		super(identifier, durationInSeconds, tester);
 		this.totalRequests = totalRequests;
 		this.rateAtTheEnd = (totalRequests * 2) / durationInSeconds;
 	}

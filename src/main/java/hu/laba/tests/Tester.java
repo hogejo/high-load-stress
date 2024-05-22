@@ -10,4 +10,6 @@ public interface Tester extends RequestBuilder, ResponseValidator {
 
 	String getDescription();
 
+	String getSummary();
+
 }
