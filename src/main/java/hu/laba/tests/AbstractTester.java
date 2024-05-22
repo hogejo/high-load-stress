@@ -18,7 +18,7 @@ public abstract class AbstractTester implements Tester {
 	protected final Configuration configuration;
 	protected final Map<Integer, ResponseValidatorFunction> validators = new ConcurrentHashMap<>();
 	protected Scenario scenario;
-	protected String summary;
+	protected String summary = "";
 
 	public AbstractTester(Configuration configuration) {
 		this.configuration = configuration;
