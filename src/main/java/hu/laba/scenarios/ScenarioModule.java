@@ -8,6 +8,7 @@ import hu.laba.tests.CreateVehicleTester;
 import hu.laba.tests.GetVehicleTester;
 import hu.laba.tests.SearchVehicleTester;
 import hu.laba.tests.StartVehicleTester;
+import hu.laba.tests.StressVehicleTester;
 import hu.laba.tests.VehicleTracker;
 
 import javax.inject.Singleton;
@@ -24,25 +25,68 @@ public interface ScenarioModule {
 		WaitScenario wait5sScenario = new WaitScenario(5);
 		SingleScenario countScenario = new SingleScenario("count", new CountVehicleTester(vehicleTracker, configuration));
 		scenarios.add(
-			new ConstantScenario("start", 10, 10, new StartVehicleTester(configuration, vehicleTracker))
+			new ConstantScenario(
+				"start", 10, 10,
+				new StartVehicleTester(configuration, vehicleTracker)
+			)
 				.withMaximumInFlightRequests(10)
 		);
 		scenarios.add(
-			new ConstantScenario("create", 100, 60, new CreateVehicleTester(configuration, vehicleTracker))
+			new ConstantScenario(
+				"create", 100, 60,
+				new CreateVehicleTester(configuration, vehicleTracker)
+			)
 				.withMaximumInFlightRequests(100)
 		);
 		scenarios.add(
-			new ConstantScenario("get", 100, 60, new GetVehicleTester(configuration, vehicleTracker))
+			new ConstantScenario(
+				"get", 100, 60,
+				new GetVehicleTester(configuration, vehicleTracker)
+			)
 				.withMaximumInFlightRequests(100)
 		);
 		scenarios.add(
-			new ConstantScenario("search", 100, 60, new SearchVehicleTester(configuration, vehicleTracker))
+			new ConstantScenario(
+				"search", 100, 60,
+				new SearchVehicleTester(configuration, vehicleTracker)
+			)
 				.withMaximumInFlightRequests(100)
 		);
 		scenarios.add(wait5sScenario);
 		scenarios.add(countScenario);
 		scenarios.add(wait5sScenario);
-		// TODO: Continue here
+		scenarios.add(
+			new ConstantScenario(
+				"stress-constant-500", 500, 60,
+				new StressVehicleTester(configuration, vehicleTracker)
+			)
+		);
+		scenarios.add(wait5sScenario);
+		scenarios.add(countScenario);
+		scenarios.add(wait5sScenario);
+		scenarios.add(
+			new LinearScenario("stress-linear-25k",25_000, 100,
+				new StressVehicleTester(configuration, vehicleTracker)
+			)
+		);
+		scenarios.add(wait5sScenario);
+		scenarios.add(countScenario);
+		scenarios.add(wait5sScenario);
+		scenarios.add(
+			new BurstScenario("stress-burst", 5000, 5,
+				new StressVehicleTester(configuration, vehicleTracker)
+			)
+		);
+		scenarios.add(wait5sScenario);
+		scenarios.add(countScenario);
+		scenarios.add(wait5sScenario);
+		scenarios.add(
+			new LinearScenario("stress-linear-100k", 100_000, 100,
+				new StressVehicleTester(configuration, vehicleTracker)
+			)
+		);
+		scenarios.add(wait5sScenario);
+		scenarios.add(countScenario);
 		return scenarios;
 	}
 

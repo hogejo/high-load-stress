@@ -1,17 +1,11 @@
 package hu.laba;
 
-import hu.laba.scenarios.AbstractScenario;
 import hu.laba.scenarios.Scenario;
-import hu.laba.scenarios.SingleScenario;
-import hu.laba.tests.CountVehicleTester;
-import hu.laba.tests.StartVehicleTester;
 import hu.laba.tests.VehicleTracker;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 @Singleton
 public class Stress {
@@ -39,52 +33,6 @@ public class Stress {
 
 	public void run() throws InterruptedException {
 		printIntroduction();
-		StartVehicleTester startTest = new StartVehicleTester(configuration, vehicleTracker);
-		/*CreateVehicleTester createTest = new CreateVehicleTester(baseUrl, vehicleTracker, configuration.dumpDirectory);
-		GetVehicleTester getTest = new GetVehicleTester(baseUrl, vehicleTracker, configuration.dumpDirectory);
-		SearchVehicleTester searchTest = new SearchVehicleTester(baseUrl, vehicleTracker, configuration.dumpDirectory);
-		StressVehicleTester stressTest = new StressVehicleTester(baseUrl, vehicleTracker, configuration.dumpDirectory);
-		 */
-		AtomicInteger countCheckId = new AtomicInteger();
-		Supplier<SingleScenario> countCheckSupplier = () -> new SingleScenario("count-check-%d".formatted(countCheckId.getAndIncrement()), new CountVehicleTester(vehicleTracker, configuration));
-		AbstractScenario[] _scenarios = new AbstractScenario[]{
-			/*new ConstantScenario(10, 10, startTest, startTest)
-				.withMaximumInFlightRequests(10),
-			new ConstantScenario(100, 60, createTest, createTest)
-				.withMaximumInFlightRequests(100),
-			new ConstantScenario(100, 60, getTest, getTest)
-				.withMaximumInFlightRequests(100),
-			new ConstantScenario(100, 60, searchTest, searchTest)
-				.withMaximumInFlightRequests(100),
-
-			new WaitScenario("sleep", 5),
-			countCheckSupplier.get(),
-			new WaitScenario("sleep", 5),
-
-			new ConstantScenario(500, 60, stressTest, stressTest),
-
-			new WaitScenario("sleep", 5),
-			countCheckSupplier.get(),
-			new WaitScenario("sleep", 5),
-
-			new LinearScenario(25_000, 100, stressTest, stressTest),
-
-			new WaitScenario("sleep", 5),
-			countCheckSupplier.get(),
-			new WaitScenario("sleep", 5),
-
-			new BurstScenario(5000, 5, stressTest, stressTest),
-
-			new WaitScenario("sleep", 5),
-			countCheckSupplier.get(),
-			new WaitScenario("sleep", 5),
-
-			new LinearScenario(100_000, 100, stressTest, stressTest),
-
-			new WaitScenario("sleep", 5),*/
-			countCheckSupplier.get()
-		};
-
 		TimeKeeper globalTimeKeeper = new TimeKeeper();
 		ScenarioLogger scenarioLogger = new ScenarioLogger(globalTimeKeeper);
 		for (Scenario scenario : scenarios) {

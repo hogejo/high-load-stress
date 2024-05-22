@@ -66,7 +66,7 @@ public class ScenarioRunner {
 
 	@SuppressWarnings("BusyWait")
 	public void run() throws InterruptedException {
-		System.out.printf("Executing scenario %s%n", scenario.getIdentifier());
+		System.out.printf("Executing scenario: %s%n", scenario.getIdentifier());
 		System.out.printf("This should take a total of %.2f seconds%n", scenario.getDurationInSeconds());
 		final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 		final OkHttpClient client = buildOkHttpClient(executorService);
@@ -112,6 +112,10 @@ public class ScenarioRunner {
 		scenarioLogger.createDataPoint();
 		executorService.shutdown();
 		System.out.printf("All done in %.2f seconds total %n", timeKeeper.now());
+		if (!scenario.getTester().getSummary().isBlank()) {
+			System.out.print("Tester summary: ");
+			System.out.println(scenario.getTester().getSummary());
+		}
 	}
 
 }
