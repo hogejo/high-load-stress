@@ -16,7 +16,7 @@ public class Configuration {
 	public boolean listScenarios = false;
 
 	@Parameter(order = 11, names = {"--scenario", "--scenarios"}, description = "Scenarios to run")
-	public List<String> scenarios;
+	public List<String> scenarios = List.of();
 
 	@Parameter(order = 20, names = "--endpoint", description = "Endpoint to run against")
 	public String endpoint = "localhost:8080";
