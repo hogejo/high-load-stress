@@ -24,7 +24,15 @@ import java.util.stream.Stream;
 
 public class ScenarioLogger extends EventListener {
 
-	private static final String csvHeader = "time,expectedRequests,scheduledRequests,startedRequests,successfulRequests,validResponses,failedRequests,requestsPerSecond,latency90th";
+	private static final String csvHeader = "time" +
+		",expectedRequests" +
+		",scheduledRequests" +
+		",startedRequests" +
+		",successfulRequests" +
+		",validResponses" +
+		",failedRequests" +
+		",requestsPerSecond" +
+		",latency90th";
 
 	public record DataPoint(
 		float time,
