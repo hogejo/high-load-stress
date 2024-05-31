@@ -22,7 +22,7 @@ public interface ScenarioModule {
 	@Singleton
 	static List<Scenario> provideScenarios(Configuration configuration, VehicleTracker vehicleTracker) {
 		List<Scenario> scenarios = new ArrayList<>();
-		WaitScenario wait5sScenario = new WaitScenario(5);
+		WaitScenario wait3sScenario = new WaitScenario(3);
 		SingleScenario countScenario = new SingleScenario("count", new CountVehicleTester(vehicleTracker, configuration));
 		scenarios.add(
 			new ConstantScenario(
@@ -52,40 +52,36 @@ public interface ScenarioModule {
 			)
 				.withMaximumInFlightRequests(100)
 		);
-		scenarios.add(wait5sScenario);
+		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
-		scenarios.add(wait5sScenario);
 		scenarios.add(
 			new ConstantScenario(
 				"stress-constant-500", 500, 60,
 				new StressVehicleTester(configuration, vehicleTracker)
 			)
 		);
-		scenarios.add(wait5sScenario);
+		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
-		scenarios.add(wait5sScenario);
 		scenarios.add(
 			new LinearScenario("stress-linear-25k",25_000, 100,
 				new StressVehicleTester(configuration, vehicleTracker)
 			)
 		);
-		scenarios.add(wait5sScenario);
+		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
-		scenarios.add(wait5sScenario);
 		scenarios.add(
 			new BurstScenario("stress-burst", 5000, 5,
 				new StressVehicleTester(configuration, vehicleTracker)
 			)
 		);
-		scenarios.add(wait5sScenario);
+		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
-		scenarios.add(wait5sScenario);
 		scenarios.add(
 			new LinearScenario("stress-linear-100k", 100_000, 100,
 				new StressVehicleTester(configuration, vehicleTracker)
 			)
 		);
-		scenarios.add(wait5sScenario);
+		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
 		return scenarios;
 	}
