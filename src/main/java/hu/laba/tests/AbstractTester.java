@@ -59,7 +59,12 @@ public abstract class AbstractTester implements Tester {
 				.collect(Collectors.joining());
 			// Request
 			output += "== %s request went to %s%n".formatted(context.request.method(), context.request.url());
-			output += "== Request headers were: %n%s%n".formatted(context.request.headers());
+			output += "== Request headers were:%n%s%n".formatted(context.request.headers());
+			if (context.getRequestBody().isBlank()) {
+				output += "== Request body was empty.\n";
+			} else {
+				output += "== Request body was:%n%s%n".formatted(context.request.body());
+			}
 			// Response
 			output += "== Response status code was %d%n".formatted(context.getResponse().code());
 			output += "== Response headers were: %n%s%n".formatted(context.getResponse().headers());
