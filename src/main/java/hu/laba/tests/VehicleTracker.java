@@ -32,6 +32,12 @@ public class VehicleTracker {
 	@Inject
 	public VehicleTracker() {}
 
+	public void printStatus() {
+		System.err.println("VehicleTracker is tracking:");
+		System.err.printf("  %d sent vehicles%n", sentVehicles.size());
+		System.err.printf("  %d stored vehicles%n", storedVehicles.size());
+	}
+
 	public Vehicle createNewRandomVehicle() {
 		Vehicle vehicle = VehicleGenerator.generateRandom(nextVehicleId.getAndIncrement());
 		while (sentVehicles.containsValue(vehicle) || storedVehicles.contains(vehicle)) {

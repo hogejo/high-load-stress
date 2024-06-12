@@ -5,7 +5,7 @@ plugins {
 // Application config
 
 group = "hu.laba"
-version = "8.2.0"
+version = "8.3.0"
 
 application {
 	mainClass.set("hu.laba.Application")
