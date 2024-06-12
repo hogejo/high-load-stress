@@ -24,6 +24,10 @@ public class RequestResponseContext {
 		this.request = request;
 	}
 
+	public String getRequestBody() {
+		return this.request.body() != null ? this.request.body().toString() : "";
+	}
+
 	public void setResponse(@NotNull Response response) {
 		if (this.response != null) {
 			throw new IllegalStateException("Response has already been set");

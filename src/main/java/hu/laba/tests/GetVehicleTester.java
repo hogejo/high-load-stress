@@ -16,7 +16,10 @@ public class GetVehicleTester extends AbstractVehicleTester {
 
 	private RequestResponseContext getVehicleTestOrFail(int requestId) {
 		return getVehicleTest(requestId)
-			.orElseThrow(() -> new IllegalStateException("no vehicles available to get"));
+			.orElseThrow(() -> {
+				vehicleTracker.printStatus();
+				return new IllegalStateException("no vehicles available to get");
+			});
 	}
 
 	@Override
