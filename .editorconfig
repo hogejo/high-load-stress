@@ -1,15 +1,38 @@
 root = true
 
-# Java and Kotlin files common
-[{*.java,*.kts,*.kt}]
+# Common settings for all files
+[*]
 charset = utf-8
-max_line_length = 120
-indent_style = tab
-indent_size = tab
-ij_smart_tabs = true
 end_of_line = lf
-trim_trailing_whitespace = true
+indent_size = tab
+indent_style = tab
 insert_final_newline = true
+max_line_length = 120
+# Do not set tab_width, so the tab size can be set by the editor.
+trim_trailing_whitespace = true
+
+# Java and Kotlin files
+[{*.java,*.kts,*.kt}]
+# IntelliJ specific settings
+ij_smart_tabs = true
+ij_java_block_brace_style = end_of_line
+ij_java_class_brace_style = end_of_line
+ij_java_lambda_brace_style = end_of_line
+ij_java_method_brace_style = end_of_line
+ij_java_do_while_brace_force = always
+ij_java_for_brace_force = always
+ij_java_if_brace_force = always
+ij_java_while_brace_force = always
+ij_java_space_before_for_left_brace = true
+ij_java_space_before_for_parentheses = true
+ij_java_space_before_if_left_brace = true
+ij_java_space_before_if_parentheses = true
+ij_java_space_before_switch_left_brace = true
+ij_java_space_before_switch_parentheses = true
+ij_java_space_before_try_left_brace = true
+ij_java_space_before_try_parentheses = true
+ij_java_space_before_while_left_brace = true
+ij_java_space_before_while_parentheses = true
 ij_java_keep_simple_classes_in_one_line = true
 ij_java_keep_simple_lambdas_in_one_line = true
 ij_java_keep_simple_methods_in_one_line = true
@@ -19,3 +42,15 @@ ij_java_class_count_to_use_import_on_demand = 999
 ij_java_names_count_to_use_import_on_demand = 999
 ij_java_packages_to_use_import_on_demand = 999
 ij_java_use_single_class_imports = true
+ij_java_doc_enable_formatting = true
+ij_java_doc_enable_leading_asterisks = true
+ij_java_doc_keep_empty_lines = false
+ij_java_doc_keep_empty_parameter_tag = false
+ij_java_doc_keep_empty_return_tag = false
+ij_java_doc_keep_empty_throws_tag = false
+ij_java_doc_preserve_line_breaks = true
+ij_java_doc_add_blank_line_after_description = false
+ij_java_doc_add_blank_line_after_param_comments = false
+ij_java_doc_add_blank_line_after_return = false
+ij_java_doc_align_param_comments = true
+ij_java_doc_align_exception_comments = true
