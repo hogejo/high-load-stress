@@ -4,11 +4,11 @@ plugins {
 
 // Application config
 
-group = "hu.laba"
+group = "me.hogejo.highload.stress"
 version = "8.3.0"
 
 application {
-	mainClass.set("hu.laba.Application")
+	mainClass.set("$group.Application")
 }
 
 java {
