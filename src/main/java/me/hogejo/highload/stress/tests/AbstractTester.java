@@ -59,7 +59,11 @@ public abstract class AbstractTester implements Tester {
 				.collect(Collectors.joining());
 			// Request
 			output += "== %s request went to %s%n".formatted(context.request.method(), context.request.url());
-			output += "== Request headers were:%n%s%n".formatted(context.request.headers());
+			if (context.request.headers().size() > 0) {
+				output += "== Request headers were:%n%s%n".formatted(context.request.headers());
+			} else {
+				output += "== Request had no extra headers.\n";
+			}
 			if (context.getRequestBody().isBlank()) {
 				output += "== Request body was empty.\n";
 			} else {
@@ -67,7 +71,11 @@ public abstract class AbstractTester implements Tester {
 			}
 			// Response
 			output += "== Response status code was %d%n".formatted(context.getResponse().code());
-			output += "== Response headers were: %n%s%n".formatted(context.getResponse().headers());
+			if (context.getResponse().headers().size() > 0) {
+				output += "== Response headers were: %n%s%n".formatted(context.getResponse().headers());
+			} else {
+				output += "== Response had no headers.\n";
+			}
 			String responseBody = context.getResponseBody();
 			if (!responseBody.isBlank()) {
 				output += "== Response body was:%n%s%n".formatted(responseBody);
