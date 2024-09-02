@@ -63,7 +63,7 @@ public interface ScenarioModule {
 		scenarios.add(wait3sScenario);
 		scenarios.add(countScenario);
 		scenarios.add(
-			new LinearScenario("stress-linear-25k",25_000, 100,
+			new LinearScenario("stress-linear-25k", 25_000, 100,
 				new StressVehicleTester(configuration, vehicleTracker)
 			)
 		);
