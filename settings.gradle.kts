@@ -1,1 +1,1 @@
-rootProject.name = "stress"
+rootProject.name = "high-load-stress"
