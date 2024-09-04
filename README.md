@@ -1,4 +1,4 @@
-# stress
+# high-load-stress
 
 Official stress test suite for "High Load Software Architectures" online class.
 
