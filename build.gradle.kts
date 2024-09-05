@@ -62,3 +62,55 @@ tasks.register("flatJar", Jar::class) {
 	with(tasks.jar.get())
 	destinationDirectory = file("build/distributions/flat")
 }
+
+//
+// Docker
+//
+
+val imageName = project.name + ":" + project.version
+val dockerWorkingDir = file(".")
+
+tasks.register<Exec>("buildImage") {
+	group = "build"
+	dependsOn(tasks.named("flatJar"))
+	workingDir = dockerWorkingDir
+	commandLine = listOf(
+		"docker", "build",
+		"-f", "docker/Dockerfile",
+		"-t", imageName,
+		"--build-arg", "PROJECT_NAME=" + project.name,
+		"--build-arg", "PROJECT_VERSION=" + project.version,
+		"."
+	)
+	doLast { println("Built Docker image: $imageName") }
+}
+
+tasks.register<Exec>("saveImage") {
+	group = "distribution"
+	dependsOn(tasks.named("buildImage"))
+	workingDir = dockerWorkingDir
+	val outputDirectory = "build/distributions/docker"
+	val output = "${outputDirectory}/${imageName.replace(":","-")}.tar"
+	mkdir(outputDirectory)
+	commandLine = listOf(
+		"docker", "save", imageName,
+		"--output", output,
+	)
+	doLast { println("Saved Docker image $imageName to $output") }
+}
+
+tasks.register<Exec>("pushImage") {
+	group = "publishing"
+	dependsOn(tasks.named("buildImage"))
+	workingDir = dockerWorkingDir
+	commandLine = listOf("docker", "push", imageName)
+	doLast { println("Pushed Docker image: $imageName") }
+}
+
+tasks.register<Exec>("runImage") {
+	group = "application"
+	dependsOn(tasks.named("buildImage"))
+	workingDir = dockerWorkingDir
+	doFirst { println("Running Docker image $imageName ...") }
+	commandLine = listOf("docker", "run", "-P", imageName)
+}
