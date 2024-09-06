@@ -67,7 +67,7 @@ public abstract class AbstractTester implements Tester {
 			if (context.getRequestBody().isBlank()) {
 				output += "== Request body was empty.\n";
 			} else {
-				output += "== Request body was:%n%s%n".formatted(context.request.body());
+				output += "== Request body was:%n%s%n".formatted(context.getResponseBody());
 			}
 			// Response
 			output += "== Response status code was %d%n".formatted(context.getResponse().code());
