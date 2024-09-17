@@ -27,7 +27,7 @@ public class RequestResponseContextTests {
 			.post(requestBody)
 			.url("https://foo.bar/baz")
 			.build();
-		RequestResponseContext requestResponseContext = new RequestResponseContext(scenario, 0, request);
+		RequestResponseContext requestResponseContext = new RequestResponseContext(scenario, 0, "description", request);
 		assertEquals(content, requestResponseContext.getRequestBody());
 	}
 
@@ -41,7 +41,7 @@ public class RequestResponseContextTests {
 			.get()
 			.url("https://foo.bar/baz")
 			.build();
-		RequestResponseContext requestResponseContext = new RequestResponseContext(scenario, 0, request);
+		RequestResponseContext requestResponseContext = new RequestResponseContext(scenario, 0, "description", request);
 		String content = "cipőfűző";
 		ResponseBody responseBody = ResponseBody.create(content, MediaType.get("text/plain"));
 		Response response = new Response.Builder()

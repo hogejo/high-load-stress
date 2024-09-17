@@ -23,7 +23,7 @@ public class SearchVehicleTester extends AbstractVehicleTester {
 			throw new IllegalStateException("no vehicles to search");
 		} else {
 			validators.put(requestId, vehicleTracker::validateSearchVehicleResponse);
-			return new RequestResponseContext(scenario, requestId, optionalRequest.get());
+			return new RequestResponseContext(scenario, requestId, "search one vehicle", optionalRequest.get());
 		}
 	}
 

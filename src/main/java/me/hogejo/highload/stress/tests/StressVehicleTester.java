@@ -29,7 +29,7 @@ public class StressVehicleTester extends AbstractVehicleTester {
 			ResponseValidator.validateBodyNotBlank(context);
 			vehicleTracker.readListOfVehicles(context);
 		});
-		return new RequestResponseContext(scenario, requestId, request);
+		return new RequestResponseContext(scenario, requestId, "search many vehicles", request);
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class StartVehicleTester extends AbstractVehicleTester {
 			return createVehicleTest(requestId);
 		} else {
 			validators.put(requestId, vehicleTracker::validateSearchVehicleResponse);
-			return new RequestResponseContext(scenario, requestId, optionalRequest.get());
+			return new RequestResponseContext(scenario, requestId, "search vehicle", optionalRequest.get());
 		}
 	}
 
@@ -43,27 +43,41 @@ public class StartVehicleTester extends AbstractVehicleTester {
 		//vehicleTracker.sentVehicles.put(requestId, vehicle);
 		String badSyntaxVehicleString = vehicle.toJsonString().replace("{", "");
 		int r = Math.abs(ThreadLocalRandom.current().nextInt()) % 4;
+		String description;
 		Request request = RequestBuilder.createVehicleRequest(
 			configuration.endpoint,
 			switch (r) {
-				case 0 -> badSyntaxVehicleString;
-				case 1 ->
-					new Vehicle(vehicle.uuid(), "", vehicle.owner(), vehicle.validity(), vehicle.data()).toCreateJsonString();
-				case 2 ->
-					new Vehicle(vehicle.uuid(), vehicle.registration(), vehicle.owner(), vehicle.validity(), null).toCreateJsonString();
-				case 3 ->
-					vehicleTracker.storedVehicles.isEmpty() ? badSyntaxVehicleString : vehicleTracker.storedVehicles.get(requestId % vehicleTracker.storedVehicles.size()).toCreateJsonString();
+				case 0 -> {
+					description = "bad syntax create vehicle";
+					yield badSyntaxVehicleString;
+				}
+				case 1 -> {
+					description = "missing registration create vehicle";
+					yield new Vehicle(vehicle.uuid(), "", vehicle.owner(), vehicle.validity(), vehicle.data()).toCreateJsonString();
+				}
+				case 2 -> {
+					description = "create vehicle with null data";
+					yield new Vehicle(vehicle.uuid(), vehicle.registration(), vehicle.owner(), vehicle.validity(), null).toCreateJsonString();
+				}
+				case 3 -> {
+					if (vehicleTracker.storedVehicles.isEmpty()) {
+						description = "bad syntax create vehicle";
+						yield badSyntaxVehicleString;
+					}
+					description = "create an existing vehicle again";
+					yield vehicleTracker.storedVehicles.get(requestId % vehicleTracker.storedVehicles.size()).toCreateJsonString();
+				}
 				default -> throw new IllegalStateException("Unexpected value: " + r);
 			}
 		);
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 4));
-		return new RequestResponseContext(scenario, requestId, request);
+		return new RequestResponseContext(scenario, requestId, description, request);
 	}
 
 	private RequestResponseContext invalidGetVehicleTest(int requestId) {
 		Request request = RequestBuilder.getVehicleRequest(configuration.endpoint, UUID.randomUUID());
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 404));
-		return new RequestResponseContext(scenario, requestId, request);
+		return new RequestResponseContext(scenario, requestId, "get random UUID", request);
 	}
 
 	private RequestResponseContext invalidSearchVehicleTest(int requestId) {
@@ -72,7 +86,7 @@ public class StartVehicleTester extends AbstractVehicleTester {
 			.url(configuration.endpoint + "/kereses")
 			.build();
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 400));
-		return new RequestResponseContext(scenario, requestId, request);
+		return new RequestResponseContext(scenario, requestId, "search vehicles with missing keyword", request);
 	}
 
 	@Override

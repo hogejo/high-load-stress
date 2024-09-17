@@ -14,15 +14,17 @@ public class RequestResponseContext {
 
 	public final Scenario scenario;
 	public final int requestId;
+	public final String description;
 	public final Request request;
 	private String requestBody = null;
 	private Response response = null;
 	private String responseBody = null;
 	private final List<String> errorMessages = new ArrayList<>();
 
-	public RequestResponseContext(Scenario scenario, int requestId, @NotNull Request request) {
+	public RequestResponseContext(Scenario scenario, int requestId, String description, @NotNull Request request) {
 		this.scenario = scenario;
 		this.requestId = requestId;
+		this.description = description;
 		this.request = request;
 	}
 

@@ -52,8 +52,8 @@ public abstract class AbstractTester implements Tester {
 
 	protected void dumpInvalidResponse(RequestResponseContext context) {
 		if (configuration.dump) {
-			System.err.printf("Request #%d is invalid. See dump for details.%n", context.requestId);
-			String output = "== Response to request #%d was invalid. Reasons:%n".formatted(context.requestId);
+			System.err.printf("Request #%d (%s) is invalid. See dump for details.%n", context.requestId, context.description);
+			String output = "== Response to request #%d (%s) was invalid. Reasons:%n".formatted(context.requestId, context.description);
 			output += context.getErrorMessages().stream()
 				.map(m -> "  " + m + "\n")
 				.collect(Collectors.joining());
