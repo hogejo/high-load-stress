@@ -5,7 +5,7 @@ plugins {
 // Application config
 
 group = "me.hogejo.highload.stress"
-version = "8.3.1"
+version = "8.4.0"
 
 application {
 	mainClass.set("$group.Application")
