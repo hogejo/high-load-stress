@@ -57,6 +57,8 @@ public class Stress {
 		System.out.printf("  %8.2f%% started requests finished successful%n", lastDataPoint.successfulRequests() * 100 / (float) lastDataPoint.startedRequests());
 		System.out.printf("  %8.2f%% successful requests valid%n", lastDataPoint.validResponses() * 100 / (float) lastDataPoint.successfulRequests());
 		System.out.println();
+		System.out.printf("VehicleTracker reports %d writes.%n", vehicleTracker.storedVehicles.size());
+		System.out.println();
 		System.out.println("Latency buckets are:");
 		scenarioLogger.getBuckets().forEach(s -> System.out.println("  " + s));
 		List<String> failReasons = scenarioLogger.getFailReasons();
