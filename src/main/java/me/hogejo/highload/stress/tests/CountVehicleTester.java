@@ -24,7 +24,7 @@ public class CountVehicleTester extends AbstractVehicleTester {
 				return true;
 			}
 		));
-		return new RequestResponseContext(scenario, requestId, "count check", RequestBuilder.countVehiclesRequest(configuration.endpoint));
+		return new RequestResponseContext(scenario, requestId, "count check", RequestBuilder.countVehiclesRequest(requestId, configuration.endpoint));
 	}
 
 }

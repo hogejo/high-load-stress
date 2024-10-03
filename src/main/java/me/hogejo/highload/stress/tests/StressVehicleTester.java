@@ -23,7 +23,7 @@ public class StressVehicleTester extends AbstractVehicleTester {
 	}
 
 	private RequestResponseContext searchManyVehiclesTest(int requestId) {
-		Request request = RequestBuilder.searchVehiclesRequest(configuration.endpoint, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
+		Request request = RequestBuilder.searchVehiclesRequest(requestId, configuration.endpoint, "AA" + VehicleGenerator.registrationCharacters.charAt(requestId % VehicleGenerator.registrationCharacters.length()));
 		validators.put(requestId, context -> {
 			ResponseValidator.validateStatusCode(context, 200);
 			ResponseValidator.validateBodyNotBlank(context);

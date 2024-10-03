@@ -45,6 +45,7 @@ public class StartVehicleTester extends AbstractVehicleTester {
 		int r = Math.abs(ThreadLocalRandom.current().nextInt()) % 4;
 		String description;
 		Request request = RequestBuilder.createVehicleRequest(
+			requestId,
 			configuration.endpoint,
 			switch (r) {
 				case 0 -> {
@@ -75,7 +76,7 @@ public class StartVehicleTester extends AbstractVehicleTester {
 	}
 
 	private RequestResponseContext invalidGetVehicleTest(int requestId) {
-		Request request = RequestBuilder.getVehicleRequest(configuration.endpoint, UUID.randomUUID());
+		Request request = RequestBuilder.getVehicleRequest(requestId, configuration.endpoint, UUID.randomUUID());
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 404));
 		return new RequestResponseContext(scenario, requestId, "get random UUID", request);
 	}
@@ -84,6 +85,7 @@ public class StartVehicleTester extends AbstractVehicleTester {
 		Request request = new Request.Builder()
 			.get()
 			.url(configuration.endpoint + "/kereses")
+			.header(RequestBuilder.X_REQUEST_ID_HEADER, String.valueOf(requestId))
 			.build();
 		validators.put(requestId, context -> ResponseValidator.validateStatusCode(context, 400));
 		return new RequestResponseContext(scenario, requestId, "search vehicles with missing keyword", request);

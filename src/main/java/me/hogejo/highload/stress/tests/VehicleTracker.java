@@ -48,7 +48,7 @@ public class VehicleTracker {
 
 	public Request createVehicleRequest(int requestId, String base, Vehicle vehicle) {
 		sentVehicles.put(requestId, vehicle);
-		return RequestBuilder.createVehicleRequest(base, vehicle.toCreateJsonString());
+		return RequestBuilder.createVehicleRequest(requestId, base, vehicle.toCreateJsonString());
 	}
 
 	public void validateCreateVehicleResponse(RequestResponseContext context) {
@@ -83,7 +83,7 @@ public class VehicleTracker {
 		if (uuid == null) {
 			throw new IllegalStateException("stored vehicles's UUID can not be null");
 		}
-		return Optional.of(RequestBuilder.getVehicleRequest(base, uuid));
+		return Optional.of(RequestBuilder.getVehicleRequest(requestId, base, uuid));
 	}
 
 	public void validateGetVehicleResponse(RequestResponseContext context) {
@@ -114,7 +114,7 @@ public class VehicleTracker {
 		}
 		int vehicleId = requestId % storedVehicles.size();
 		queriedVehicles.put(requestId, vehicleId);
-		return Optional.of(RequestBuilder.searchVehiclesRequest(base, storedVehicles.get(vehicleId).registration()));
+		return Optional.of(RequestBuilder.searchVehiclesRequest(requestId, base, storedVehicles.get(vehicleId).registration()));
 	}
 
 	public List<Vehicle> readListOfVehicles(RequestResponseContext context) {
